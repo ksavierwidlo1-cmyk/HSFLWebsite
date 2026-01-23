@@ -72,22 +72,22 @@ export default function Navigation() {
               }
             >
               {isElevate ? "→ EBA" : "→ Elevate 302"}
-                <Image
-                  src="/logo.png"
-                  alt="EBA Logo"
-                  width={40}
-                  height={40}
-                  className="object-contain"
-                />
-              </div>
-              <span className="font-bold text-xl text-gray-900 dark:text-white hidden sm:block">Elite Basketball Association</span>
             </Link>
           </div>
           
           <div className="flex items-center gap-1 flex-wrap">
             <div className="flex gap-1 flex-wrap">
               {navItems.map((item) => {
-                const Icon text-white'
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-1 px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'text-white'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                     style={isActive ? (isElevate ? { backgroundColor: '#8cd2fe' } : { backgroundColor: '#00A8E8' }) : {}}
@@ -96,57 +96,10 @@ export default function Navigation() {
                     <span className="hidden lg:inline">{item.label}</span>
                   </Link>
                 );
-              })}      >
-                            <Icon className="w-4 h-4" />
-                            {item.label}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
+              })}
             </div>
             
             {/* Profile Button */}
-            {status === "authenticated" && session?.user?.playerId ? (
-              <Link
-                href={`/players/${session.user.playerId}`}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-eba-blue text-white hover:bg-blue-700 transition-colors shadow-sm ml-2"
-              >
-                {session.user.profilePicture ? (
-                  <img
-                    src={session.user.profilePicture}
-                    alt="Profile"
-                    className="w-6 h-6 rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="w-4 h-4" />
-                )}
-                <span className="whitespace-nowrap">Profile</span>
-              </Link>
-            ) : (
-              <button
-                onClick={() => signIn("roblox", { callbackUrl: '/' })}
-                disabled={status === "loading"}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-eba-blue text-white hover:bg-blue-700 transition-colors shadow-sm ml-2 disabled:opacity-50"
-              >
-                <User className="w-4 h-4" />
-                <span className="whitespace-nowrap">Log In</span>
-              </button>
-            )}
-            
-            <button
-              onClick={toggleTheme}
-              className="ml-2 p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>{/* Profile Button */}
             {status === "authenticated" && session?.user?.playerId ? (
               <Link
                 href={`/players/${session.user.playerId}`}
@@ -176,3 +129,22 @@ export default function Navigation() {
                   { backgroundColor: '#8cd2fe' } : 
                   { backgroundColor: '#00A8E8' }
                 }
+              >
+                <User className="w-4 h-4" />
+                <span className="whitespace-nowrap">Log In</span>
+              </button>
+            )}
+            
+            <button
+              onClick={toggleTheme}
+              className="ml-2 p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}
