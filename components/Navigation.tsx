@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Users, Link2, TrendingUp, Calendar, Search, Shield, Sun, Moon, Trophy, Briefcase, Award, User } from 'lucide-react';
+import { Home, Users, Link2, TrendingUp, Calendar, Search, Shield, Sun, Moon, Trophy, Briefcase, Award, User, ChevronDown } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { useSession, signIn } from 'next-auth/react';
+import { useState } from 'react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
@@ -20,10 +21,17 @@ const navItems = [
   { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
+const elevateNavItems = [
+  { href: '/elevate/branding', label: 'Branding', icon: Users },
+  { href: '/elevate/players', label: 'Players', icon: Search },
+  { href: '/elevate/games', label: 'Games', icon: Calendar },
+];
+
 export default function Navigation() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
   const { data: session, status } = useSession();
+  const [elevateDropdownOpen, setElevateDropdownOpen] = useState(false);
 
   // Debug logging
   console.log('[NAV DEBUG] Status:', status);
@@ -70,6 +78,55 @@ export default function Navigation() {
                   </Link>
                 );
               })}
+              
+              {/* Elevate 302 Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setElevateDropdownOpen(!elevateDropdownOpen)}
+                  className={`flex items-center gap-1 px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname.startsWith('/elevate')
+                      ? 'text-white'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
+                  style={pathname.startsWith('/elevate') ? { backgroundColor: '#8cd2fe' } : {}}
+                >
+                  <Image src="/elevate302.png" alt="Elevate 302" width={16} height={16} className="rounded" />
+                  <span className="hidden lg:inline">Elevate 302</span>
+                  <ChevronDown className="w-3 h-3" />
+                </button>
+                
+                {elevateDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setElevateDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
+                      {elevateNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+                        
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setElevateDropdownOpen(false)}
+                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                              isActive
+                                ? 'text-white'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                            style={isActive ? { backgroundColor: '#8cd2fe' } : {}}
+                          >
+                            <Icon className="w-4 h-4" />
+                            {item.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             
             {/* Profile Button */}
