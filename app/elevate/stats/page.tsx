@@ -232,7 +232,7 @@ export default function ElevateStatsPage() {
             value={selectedSeason}
             onChange={(e) => setSelectedSeason(e.target.value)}
             className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none"
-            style={{ focusBorderColor: '#8cd2fe' }}
+            style={{ borderColor: '#8cd2fe' }}
           >
             {availableSeasons.map(season => (
               <option key={season} value={season}>{season}</option>

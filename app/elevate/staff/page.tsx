@@ -1,37 +1,51 @@
-import { createClient } from '@/lib/supabase';
+'use client';
 
-export const metadata = {
-  title: 'Staff | Elevate 302',
-  description: 'Meet the Elevate 302 staff',
-};
-
-export const revalidate = 0;
+import { useEffect, useState } from 'react';
 
 async function getStaff() {
-  const supabase = createClient();
 
-  const { data: staff } = await supabase
-    .from('elevate302_staff')
-    .select(`
-      *,
-      team:elevate302_teams (
-        id,
-        name,
-        logo,
-        primary_color
-      )
-    `)
-    .order('role')
-    .order('name');
-
-  return staff || [];
+  try {
+    const res = await fetch('/api/elevate/staff');
+    const staff = await res.json();
+    return staff || [];
+  } catch (error) {
+    console.error('Error fetching staff:', error);
+    return [];
+  }
 }
 
-export default async function ElevateStaffPage() {
-  const staff = await getStaff();
+export default function ElevateStaffPage() {
+  const [staff, setStaff] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStaff();
+  }, []);
+
+  const fetchStaff = async () => {
+    try {
+      const res = await fetch('/api/elevate/staff');
+      const data = await res.json();
+      setStaff(data);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-gray-600 dark:text-gray-400">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   // Group by role
-  const roleGroups = staff.reduce((acc, member) => {
+  const roleGroups = staff.reduce((acc: Record<string, any[]>, member: any) => {
     if (!acc[member.role]) {
       acc[member.role] = [];
     }
