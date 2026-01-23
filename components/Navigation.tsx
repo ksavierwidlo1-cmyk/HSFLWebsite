@@ -30,7 +30,7 @@ const elevateNavItems = [
   { href: '/elevate/games', label: 'Games', icon: Calendar },
   { href: '/elevate/players', label: 'Players', icon: Search },
   { href: '/elevate/staff', label: 'Staff', icon: Briefcase },
-  { href: '/admin', label: 'Admin', icon: Shield },
+  { href: '/elevate/admin', label: 'Admin', icon: Shield },
 ];
 
 export default function Navigation() {
