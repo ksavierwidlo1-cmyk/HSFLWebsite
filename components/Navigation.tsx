@@ -33,7 +33,16 @@ const elevateNavItems = [
   { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
-exreturn (
+export default function Navigation() {
+  const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
+  const { data: session, status } = useSession();
+  
+  // Determine if we're in Elevate 302 section
+  const isElevate = pathname.startsWith('/elevate');
+  const navItems = isElevate ? elevateNavItems : ebaNavItems;
+
+  return (
     <nav className="bg-white dark:bg-eba-dark border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex items-center justify-between min-h-16 py-2">
