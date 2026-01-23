@@ -226,7 +226,7 @@ export default function ElevateStandingsPage() {
               value={selectedSeason}
               onChange={(e) => setSelectedSeason(e.target.value)}
               className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-white shadow-sm"
-              style={{ focusBorderColor: '#8cd2fe' }}
+              style={{ borderColor: '#8cd2fe' }}
             >
               {availableSeasons.map((season) => (
                 <option key={season} value={season}>
