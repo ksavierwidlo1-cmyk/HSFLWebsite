@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trophy, TrendingUp, Award } from 'lucide-react';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 interface TeamStanding {
   team: any;
@@ -30,8 +31,8 @@ const TIER_TEXT_COLORS = {
 };
 
 export default function ElevateRankingsPage() {
-  const [selectedSeason, setSelectedSeason] = useState<string>('All-Time');
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>(['All-Time']);
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
+  const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,19 +47,15 @@ export default function ElevateRankingsPage() {
       const res = await fetch('/api/seasons');
       if (res.ok) {
         const seasons = await res.json();
-        const seasonNames = seasons.map((s: any) => s.name);
         
-        // Always include All-Time
-        if (!seasonNames.includes('All-Time')) {
-          seasonNames.push('All-Time');
-        }
-        
-        setAvailableSeasons(seasonNames);
+        setAvailableSeasons(seasons);
         
         // Set current season as default
         const currentSeason = seasons.find((s: any) => s.isCurrent);
         if (currentSeason) {
-          setSelectedSeason(currentSeason.name);
+          setSelectedSeasons([currentSeason.name]);
+        } else if (seasons.length > 0) {
+          setSelectedSeasons([seasons[0].name]);
         }
       }
     } catch (error) {
@@ -86,16 +83,19 @@ export default function ElevateRankingsPage() {
   };
 
   // Calculate standings for each team
-  const calculateStandings = (seasonFilter?: string): TeamStanding[] => {
+  const calculateStandings = (seasonFilters?: string[]): TeamStanding[] => {
     return teams.map(team => {
       // Get all completed games for this team
       let teamGames = games.filter(
         g => (g.homeTeamId === team.id || g.awayTeamId === team.id) && g.status === 'completed'
       );
 
-      // Filter by season if not "All-Time"
-      if (seasonFilter && seasonFilter !== 'All-Time') {
-        teamGames = teamGames.filter(game => game.season === seasonFilter);
+      // Filter by season(s) if not "All-Time"
+      if (seasonFilters && !(seasonFilters.includes('All-Time') && seasonFilters.length === 1)) {
+        const seasonsToFilter = seasonFilters.filter(s => s !== 'All-Time');
+        if (seasonsToFilter.length > 0) {
+          teamGames = teamGames.filter(game => seasonsToFilter.includes(game.season));
+        }
       }
 
       let wins = 0;
@@ -142,7 +142,7 @@ export default function ElevateRankingsPage() {
   };
 
   const getStandings = () => {
-    const standings = calculateStandings(selectedSeason);
+    const standings = calculateStandings(selectedSeasons);
     
     // Sort by wins (descending), then by losses (ascending), then by point differential (descending)
     return standings.sort((a, b) => {
@@ -305,22 +305,20 @@ export default function ElevateRankingsPage() {
 
         {/* Season Filter */}
         <div className="flex justify-center mb-8">
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-md">
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 text-center">
-              Select Season
+              Select Season(s)
             </label>
-            <select
-              value={selectedSeason}
-              onChange={(e) => setSelectedSeason(e.target.value)}
-              className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-white shadow-sm"
-              style={{ borderColor: '#8cd2fe' }}
-            >
-              {availableSeasons.map((season) => (
-                <option key={season} value={season}>
-                  {season}
-                </option>
-              ))}
-            </select>
+            <MultiSeasonSelector
+              availableSeasons={availableSeasons.map(s => ({
+                id: s.id,
+                name: s.name,
+                isCurrent: s.isCurrent
+              }))}
+              selectedSeasons={selectedSeasons}
+              onChange={setSelectedSeasons}
+              accentColor="#8cd2fe"
+            />
           </div>
         </div>
 

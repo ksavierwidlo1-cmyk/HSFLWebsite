@@ -36,10 +36,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     
     // Apply new theme
     if (newTheme !== 'light') {
-      document.documentElement.classList.add(newTheme);
-      // All non-light themes use the 'dark' class for base dark mode styling
-      if (!document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.add('dark');
+      // All non-light themes need the 'dark' class for base dark mode styling
+      document.documentElement.classList.add('dark');
+      // Add the specific theme class if it's not the base dark theme
+      if (newTheme !== 'dark') {
+        document.documentElement.classList.add(newTheme);
       }
     }
     
@@ -53,10 +54,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         root.style.setProperty('--text-secondary', '107, 114, 128');
         break;
       case 'dark':
-        root.style.setProperty('--bg-primary', '31, 41, 55');
-        root.style.setProperty('--bg-secondary', '17, 24, 39');
+        root.style.setProperty('--bg-primary', '18, 18, 18');
+        root.style.setProperty('--bg-secondary', '10, 10, 10');
         root.style.setProperty('--text-primary', '255, 255, 255');
-        root.style.setProperty('--text-secondary', '156, 163, 175');
+        root.style.setProperty('--text-secondary', '163, 163, 163');
         break;
       case 'midnight':
         root.style.setProperty('--bg-primary', '23, 37, 84');

@@ -5,13 +5,14 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getSeasonDisplay, LEAGUE_CONFIG } from '@/lib/config';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 type GameFilter = 'all' | 'upcoming' | 'completed';
 
 export default function GamesPage() {
   const [filter, setFilter] = useState<GameFilter>('all');
-  const [selectedSeason, setSelectedSeason] = useState<string>('All-Time');
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>(['All-Time']);
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
+  const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,19 +27,15 @@ export default function GamesPage() {
       const res = await fetch('/api/seasons');
       if (res.ok) {
         const seasons = await res.json();
-        const seasonNames = seasons.map((s: any) => s.name);
         
-        // Always include All-Time
-        if (!seasonNames.includes('All-Time')) {
-          seasonNames.push('All-Time');
-        }
-        
-        setAvailableSeasons(seasonNames);
+        setAvailableSeasons(seasons);
         
         // Set current season as default
         const currentSeason = seasons.find((s: any) => s.isCurrent);
         if (currentSeason) {
-          setSelectedSeason(currentSeason.name);
+          setSelectedSeasons([currentSeason.name]);
+        } else if (seasons.length > 0) {
+          setSelectedSeasons([seasons[0].name]);
         }
       }
     } catch (error) {
@@ -70,8 +67,16 @@ export default function GamesPage() {
     if (filter === 'upcoming' && game.status !== 'scheduled') return false;
     if (filter === 'completed' && game.status !== 'completed') return false;
     
-    // Filter by season
-    if (selectedSeason !== 'All-Time' && game.season !== selectedSeason) return false;
+    // Filter by season(s)
+    if (selectedSeasons.includes('All-Time') && selectedSeasons.length === 1) {
+      return true; // Show all games when only All-Time is selected
+    }
+    
+    // Show games from any selected season (excluding All-Time if other seasons are selected)
+    const seasonsToFilter = selectedSeasons.filter(s => s !== 'All-Time');
+    if (seasonsToFilter.length > 0) {
+      return seasonsToFilter.includes(game.season);
+    }
     
     return true;
   }).sort((a, b) => new Date(b.scheduledDate).getTime() - new Date(a.scheduledDate).getTime());
@@ -97,19 +102,18 @@ export default function GamesPage() {
       {/* Season Filter */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-          Select Season
+          Select Season(s)
         </label>
-        <select
-          value={selectedSeason}
-          onChange={(e) => setSelectedSeason(e.target.value)}
-          className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-        >
-          {availableSeasons.map((season) => (
-            <option key={season} value={season}>
-              {season}
-            </option>
-          ))}
-        </select>
+        <MultiSeasonSelector
+          availableSeasons={availableSeasons.map(s => ({
+            id: s.id,
+            name: s.name,
+            isCurrent: s.isCurrent
+          }))}
+          selectedSeasons={selectedSeasons}
+          onChange={setSelectedSeasons}
+          accentColor="#00A8E8"
+        />
       </div>
 
       {/* Filter Tabs */}

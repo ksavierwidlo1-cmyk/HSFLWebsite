@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trophy, TrendingUp, TrendingDown } from 'lucide-react';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 type ViewMode = 'overall' | 'eastern' | 'western';
 type RecordType = 'overall' | 'conference';
@@ -22,8 +23,8 @@ interface TeamStanding {
 export default function ElevateStandingsPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('overall');
   const [recordType, setRecordType] = useState<RecordType>('overall');
-  const [selectedSeason, setSelectedSeason] = useState<string>('All-Time');
-  const [availableSeasons, setAvailableSeasons] = useState<string[]>(['All-Time']);
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
+  const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,19 +39,15 @@ export default function ElevateStandingsPage() {
       const res = await fetch('/api/seasons');
       if (res.ok) {
         const seasons = await res.json();
-        const seasonNames = seasons.map((s: any) => s.name);
         
-        // Always include All-Time
-        if (!seasonNames.includes('All-Time')) {
-          seasonNames.push('All-Time');
-        }
-        
-        setAvailableSeasons(seasonNames);
+        setAvailableSeasons(seasons);
         
         // Set current season as default
         const currentSeason = seasons.find((s: any) => s.isCurrent);
         if (currentSeason) {
-          setSelectedSeason(currentSeason.name);
+          setSelectedSeasons([currentSeason.name]);
+        } else if (seasons.length > 0) {
+          setSelectedSeasons([seasons[0].name]);
         }
       }
     } catch (error) {
@@ -78,16 +75,19 @@ export default function ElevateStandingsPage() {
   };
 
   // Calculate standings for each team
-  const calculateStandings = (conferenceFilter?: 'Eastern' | 'Western', seasonFilter?: string, recordTypeFilter?: RecordType): TeamStanding[] => {
+  const calculateStandings = (conferenceFilter?: 'Eastern' | 'Western', seasonFilters?: string[], recordTypeFilter?: RecordType): TeamStanding[] => {
     return teams.map(team => {
       // Get all completed games for this team
       let teamGames = games.filter(
         g => (g.homeTeamId === team.id || g.awayTeamId === team.id) && g.status === 'completed'
       );
 
-      // Filter by season if not "All-Time"
-      if (seasonFilter && seasonFilter !== 'All-Time') {
-        teamGames = teamGames.filter(game => game.season === seasonFilter);
+      // Filter by season(s) if not "All-Time"
+      if (seasonFilters && !(seasonFilters.includes('All-Time') && seasonFilters.length === 1)) {
+        const seasonsToFilter = seasonFilters.filter(s => s !== 'All-Time');
+        if (seasonsToFilter.length > 0) {
+          teamGames = teamGames.filter(game => seasonsToFilter.includes(game.season));
+        }
       }
 
       // If recordType is 'conference', only count games against teams in the same conference
@@ -170,7 +170,7 @@ export default function ElevateStandingsPage() {
     let standings: TeamStanding[];
     
     // Calculate standings with recordType determining which games count
-    standings = calculateStandings(undefined, selectedSeason, recordType);
+    standings = calculateStandings(undefined, selectedSeasons, recordType);
     
     // Filter teams by conference for display only
     if (viewMode === 'eastern') {
@@ -220,20 +220,18 @@ export default function ElevateStandingsPage() {
           {/* Season Filter */}
           <div className="w-full max-w-xs">
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 text-center">
-              Select Season
+              Select Season(s)
             </label>
-            <select
-              value={selectedSeason}
-              onChange={(e) => setSelectedSeason(e.target.value)}
-              className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none text-gray-900 dark:text-white shadow-sm"
-              style={{ borderColor: '#8cd2fe' }}
-            >
-              {availableSeasons.map((season) => (
-                <option key={season} value={season}>
-                  {season}
-                </option>
-              ))}
-            </select>
+            <MultiSeasonSelector
+              availableSeasons={availableSeasons.map(s => ({
+                id: s.id,
+                name: s.name,
+                isCurrent: s.isCurrent
+              }))}
+              selectedSeasons={selectedSeasons}
+              onChange={setSelectedSeasons}
+              accentColor="#8cd2fe"
+            />
           </div>
 
           {/* Record Type Filter */}

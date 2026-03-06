@@ -10,9 +10,11 @@ export default function Elevate302PlayerProfilePage({ params }: { params: { id: 
   const [player, setPlayer] = useState<any>(null);
   const [team, setTeam] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     fetchData();
+    setImageError(false); // Reset image error when player changes
   }, [params.id]);
 
   const fetchData = async () => {
@@ -99,15 +101,12 @@ export default function Elevate302PlayerProfilePage({ params }: { params: { id: 
       <div className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm relative z-10">
         <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
           <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 border-4 border-white dark:border-gray-800">
-            {player.profilePicture ? (
+            {player.profilePicture && !imageError ? (
               <img
                 src={player.profilePicture}
                 alt={player.displayName}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = '<svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
-                }}
+                onError={() => setImageError(true)}
               />
             ) : (
               <User className="w-16 h-16 text-gray-400" />

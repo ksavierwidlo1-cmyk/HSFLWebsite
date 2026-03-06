@@ -1,25 +1,28 @@
 'use client';
 
-import { User, Shield, Award, Users as UsersIcon, ChevronDown } from 'lucide-react';
+import { User, Shield, Award, Users as UsersIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import EditProfile from '@/components/EditProfile';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 export default function PlayerProfilePage({ params }: { params: { id: string } }) {
   const [player, setPlayer] = useState<any>(null);
   const [team, setTeam] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedSeason, setSelectedSeason] = useState<string>('All-Time');
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
   const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
+  const [imageError, setImageError] = useState(false);
   const { data: session } = useSession();
 
   useEffect(() => {
     fetchData();
     fetchSeasons();
+    setImageError(false); // Reset image error when player changes
   }, [params.id]);
 
   const fetchSeasons = async () => {
@@ -32,9 +35,9 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         // Set current season as default
         const currentSeason = seasons.find((s: any) => s.isCurrent);
         if (currentSeason) {
-          setSelectedSeason(currentSeason.name);
+          setSelectedSeasons([currentSeason.name]);
         } else if (seasons.length > 0) {
-          setSelectedSeason(seasons[0].name);
+          setSelectedSeasons([seasons[0].name]);
         }
       }
     } catch (error) {
@@ -125,12 +128,13 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       return [];
     }
 
-    if (selectedSeason === 'All-Time') {
+    if (selectedSeasons.includes('All-Time') && selectedSeasons.length === 1) {
       return player.gameStats;
     }
 
-    // Filter by season
-    const seasonGames = games.filter(g => g.season === selectedSeason);
+    // Filter by multiple seasons
+    const seasonsToFilter = selectedSeasons.filter(s => s !== 'All-Time');
+    const seasonGames = games.filter(g => seasonsToFilter.includes(g.season));
     const seasonGameIds = new Set(seasonGames.map(g => g.id));
     return player.gameStats.filter((gs: any) => seasonGameIds.has(gs.gameId));
   };
@@ -301,15 +305,12 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
         <div className="flex flex-col md:flex-row items-center md:items-start space-y-3 sm:space-y-4 md:space-y-0 md:space-x-4 lg:space-x-6">
           {/* Profile Picture */}
           <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 border-4 border-white dark:border-gray-800">
-            {player.profilePicture ? (
+            {player.profilePicture && !imageError ? (
               <img
                 src={player.profilePicture}
                 alt={player.displayName}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.innerHTML = '<svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
-                }}
+                onError={() => setImageError(true)}
               />
             ) : (
               <User className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-gray-400" />
@@ -370,26 +371,18 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       {/* Season Selector */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 flex-1">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Viewing Stats For:</h3>
-            <div className="relative">
-              <select
-                value={selectedSeason}
-                onChange={(e) => setSelectedSeason(e.target.value)}
-                className="appearance-none bg-gradient-to-r from-eba-blue to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 pr-8 sm:pr-10 rounded-xl text-sm sm:text-base font-medium cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-eba-blue focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                style={{
-                  minWidth: '160px'
-                }}
-              >
-                <option value="All-Time" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">All-Time</option>
-                {availableSeasons.map((season: any) => (
-                  <option key={season.id} value={season.name} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                    {season.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white pointer-events-none" />
-            </div>
+            <MultiSeasonSelector
+              availableSeasons={availableSeasons.map(s => ({
+                id: s.id,
+                name: s.name,
+                isCurrent: s.isCurrent
+              }))}
+              selectedSeasons={selectedSeasons}
+              onChange={setSelectedSeasons}
+              accentColor="#00A8E8"
+            />
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
             Career totals are always shown for all seasons combined

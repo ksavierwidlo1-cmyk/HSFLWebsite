@@ -4,16 +4,41 @@ import { Trophy, Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 export default function Elevate302GamesPage() {
   const [games, setGames] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'live' | 'completed' | 'scheduled'>('all');
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
+  const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
+    fetchSeasons();
   }, []);
+
+  const fetchSeasons = async () => {
+    try {
+      const res = await fetch('/api/elevate/seasons');
+      if (res.ok) {
+        const seasons = await res.json();
+        
+        setAvailableSeasons(seasons);
+        
+        // Set current season as default
+        const currentSeason = seasons.find((s: any) => s.isCurrent);
+        if (currentSeason) {
+          setSelectedSeasons([currentSeason.name]);
+        } else if (seasons.length > 0) {
+          setSelectedSeasons([seasons[0].name]);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching seasons:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -37,8 +62,21 @@ export default function Elevate302GamesPage() {
   const getTeam = (teamId: string) => teams.find(t => t.id === teamId);
 
   const filteredGames = games.filter(game => {
-    if (filter === 'all') return true;
-    return game.status === filter;
+    // Filter by status
+    if (filter !== 'all' && game.status !== filter) return false;
+    
+    // Filter by season(s)
+    if (selectedSeasons.includes('All-Time') && selectedSeasons.length === 1) {
+      return true; // Show all games when only All-Time is selected
+    }
+    
+    // Show games from any selected season (excluding All-Time if other seasons are selected)
+    const seasonsToFilter = selectedSeasons.filter(s => s !== 'All-Time');
+    if (seasonsToFilter.length > 0 && game.season) {
+      return seasonsToFilter.includes(game.season);
+    }
+    
+    return true;
   });
 
   if (loading) {
@@ -64,6 +102,23 @@ export default function Elevate302GamesPage() {
           <h1 className="text-4xl font-bold mb-2" style={{ color: '#8cd2fe' }}>Games Schedule</h1>
           <p className="text-gray-600 dark:text-gray-400">View all Elevate 302 games</p>
         </div>
+      </div>
+
+      {/* Season Filter */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+          Select Season(s)
+        </label>
+        <MultiSeasonSelector
+          availableSeasons={availableSeasons.map(s => ({
+            id: s.id,
+            name: s.name,
+            isCurrent: s.isCurrent
+          }))}
+          selectedSeasons={selectedSeasons}
+          onChange={setSelectedSeasons}
+          accentColor="#8cd2fe"
+        />
       </div>
 
       {/* Status Filter */}
