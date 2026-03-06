@@ -90,7 +90,7 @@ export default function PlayersPage() {
                         src={player.profilePicture}
                         alt={player.displayName}
                         className="w-full h-full object-cover"
-                        onError={() => setImageErrors(prev => new Set([...prev, player.id]))}
+                        onError={() => setImageErrors(prev => new Set(Array.from(prev).concat(player.id)))}
                       />
                     ) : (
                       <User className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-400" />
