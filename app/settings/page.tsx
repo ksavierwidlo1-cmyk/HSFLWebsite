@@ -40,40 +40,40 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2 flex items-center text-gray-900 dark:text-white">
-          <SettingsIcon className="w-10 h-10 mr-3 text-eba-blue" />
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 flex items-center text-gray-900 dark:text-white">
+          <SettingsIcon className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 mr-2 sm:mr-3 text-eba-blue" />
           Settings
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">Customize your experience</p>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Customize your experience</p>
       </div>
 
       {/* Theme Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
-        <div className="flex items-center space-x-3 mb-4">
-          <Palette className="w-6 h-6 text-eba-blue" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Theme</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+        <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+          <Palette className="w-5 h-5 sm:w-6 sm:h-6 text-eba-blue" />
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Theme</h2>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">Choose your preferred color scheme</p>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Choose your preferred color scheme</p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {themes.map((themeOption) => (
             <button
               key={themeOption.value}
               onClick={() => setTheme(themeOption.value as any)}
-              className={`p-4 rounded-lg border-2 transition-all text-left ${
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all text-left ${
                 theme === themeOption.value
                   ? 'border-eba-blue bg-blue-50 dark:bg-blue-900/20'
                   : 'border-gray-200 dark:border-gray-700 hover:border-eba-blue/50'
               }`}
             >
-              <div className="flex items-center space-x-3 mb-3">
-                <div className={`w-12 h-12 rounded-lg border-2 ${themeOption.preview}`}></div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{themeOption.label}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{themeOption.description}</p>
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg border-2 ${themeOption.preview}`}></div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{themeOption.label}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{themeOption.description}</p>
                 </div>
               </div>
               {theme === themeOption.value && (
@@ -85,19 +85,19 @@ export default function SettingsPage() {
       </div>
 
       {/* Display Settings */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
-        <div className="flex items-center space-x-3 mb-4">
-          <Eye className="w-6 h-6 text-eba-blue" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Display</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+        <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+          <Eye className="w-5 h-5 sm:w-6 sm:h-6 text-eba-blue" />
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Display</h2>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">Adjust visual preferences</p>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Adjust visual preferences</p>
         
         <div className="space-y-4">
           {/* Profile Pictures Toggle */}
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Show Profile Pictures</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Display player profile pictures throughout the site</p>
+          <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg gap-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-1">Show Profile Pictures</h3>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Display player profile pictures throughout the site</p>
             </div>
             <button
               onClick={() => handleShowProfilePicsChange(!showProfilePics)}

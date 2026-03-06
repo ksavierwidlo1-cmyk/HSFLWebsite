@@ -285,7 +285,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
   };
   
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
       {/* Team-colored Banner */}
       {team && (
         <div 
@@ -297,10 +297,10 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       )}
       
       {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm relative z-10">
-        <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 md:p-8 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm relative z-10">
+        <div className="flex flex-col md:flex-row items-center md:items-start space-y-3 sm:space-y-4 md:space-y-0 md:space-x-4 lg:space-x-6">
           {/* Profile Picture */}
-          <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 border-4 border-white dark:border-gray-800">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0 border-4 border-white dark:border-gray-800">
             {player.profilePicture ? (
               <img
                 src={player.profilePicture}
@@ -312,17 +312,17 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                 }}
               />
             ) : (
-              <User className="w-16 h-16 text-gray-400" />
+              <User className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-gray-400" />
             )}
           </div>
 
           {/* Player Info */}
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">{player.displayName}</h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-3">@{player.robloxUsername}</p>
+          <div className="flex-1 text-center md:text-left w-full">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-gray-900 dark:text-white break-words">{player.displayName}</h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3">@{player.robloxUsername}</p>
             
             {player.description && (
-              <p className="text-gray-700 dark:text-gray-300 mb-4">{player.description}</p>
+              <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4">{player.description}</p>
             )}
 
             {/* Team */}
@@ -368,17 +368,17 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       </div>
 
       {/* Season Selector */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Viewing Stats For:</h3>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Viewing Stats For:</h3>
             <div className="relative">
               <select
                 value={selectedSeason}
                 onChange={(e) => setSelectedSeason(e.target.value)}
-                className="appearance-none bg-gradient-to-r from-eba-blue to-blue-600 text-white px-6 py-2.5 pr-10 rounded-xl font-medium cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-eba-blue focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                className="appearance-none bg-gradient-to-r from-eba-blue to-blue-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 pr-8 sm:pr-10 rounded-xl text-sm sm:text-base font-medium cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-eba-blue focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 style={{
-                  minWidth: '200px'
+                  minWidth: '160px'
                 }}
               >
                 <option value="All-Time" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">All-Time</option>
@@ -388,7 +388,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white pointer-events-none" />
+              <ChevronDown className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-white pointer-events-none" />
             </div>
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -398,34 +398,34 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       </div>
 
       {/* Record */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
-        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Record</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-3xl font-bold text-eba-blue">{seasonStats.gamesPlayed}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Games Played</div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-white">Record</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          <div className="text-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-2xl sm:text-3xl font-bold text-eba-blue">{seasonStats.gamesPlayed}</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Games Played</div>
           </div>
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-3xl font-bold text-green-500">{seasonStats.wins}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Wins</div>
+          <div className="text-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-2xl sm:text-3xl font-bold text-green-500">{seasonStats.wins}</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Wins</div>
           </div>
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-3xl font-bold text-red-500">{seasonStats.losses}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Losses</div>
+          <div className="text-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-2xl sm:text-3xl font-bold text-red-500">{seasonStats.losses}</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Losses</div>
           </div>
-          <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-3xl font-bold text-eba-blue">{winPercentage}%</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Win %</div>
+          <div className="text-center p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-2xl sm:text-3xl font-bold text-eba-blue">{winPercentage}%</div>
+            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Win %</div>
           </div>
         </div>
       </div>
 
       {/* Averages */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
-        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Averages</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
-          <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{seasonStats.points.toFixed(1)}</div>
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-white">Averages</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 sm:gap-3 md:gap-4">
+          <div className="text-center p-2 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{seasonStats.points.toFixed(1)}</div>
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">PTS</div>
           </div>
           <div className="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">

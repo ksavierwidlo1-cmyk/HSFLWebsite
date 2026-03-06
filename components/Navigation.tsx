@@ -42,12 +42,12 @@ export default function Navigation() {
   const navItems = isElevate ? elevateNavItems : ebaNavItems;
 
   return (
-    <nav className="bg-white dark:bg-eba-dark border-b border-gray-200 dark:border-gray-800 shadow-sm">
+    <nav className="bg-white dark:bg-eba-dark border-b border-gray-200 dark:border-gray-800 shadow-sm sticky top-0 z-50">
       <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="flex items-center justify-between min-h-16 py-2">
-          <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="relative w-10 h-10">
+        <div className="flex items-center justify-between min-h-14 sm:min-h-16 py-1 sm:py-2">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10">
                 <Image
                   src={isElevate ? "/elevate302.png" : "/logo.png"}
                   alt={isElevate ? "Elevate 302" : "EBA Logo"}
@@ -56,7 +56,7 @@ export default function Navigation() {
                   className="object-contain"
                 />
               </div>
-              <span className="font-bold text-xl text-gray-900 dark:text-white hidden sm:block">
+              <span className="font-bold text-base sm:text-xl text-gray-900 dark:text-white hidden md:block">
                 {isElevate ? "Elevate 302" : "Elite Basketball Association"}
               </span>
             </Link>
@@ -64,7 +64,7 @@ export default function Navigation() {
             {/* League Switcher */}
             <Link
               href={isElevate ? "/branding" : "/elevate/branding"}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border-2"
+              className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-colors border-2 hidden xs:block"
               style={isElevate ? 
                 { borderColor: '#8cd2fe', color: '#8cd2fe' } : 
                 { borderColor: '#00A8E8', color: '#00A8E8' }
@@ -74,8 +74,8 @@ export default function Navigation() {
             </Link>
           </div>
           
-          <div className="flex items-center gap-1 flex-wrap">
-            <div className="flex gap-1 flex-wrap">
+          <div className="flex items-center gap-0.5 sm:gap-1 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-0.5 sm:gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
@@ -84,15 +84,15 @@ export default function Navigation() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-1 px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1 px-1.5 sm:px-2 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                       isActive
                         ? 'text-white'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                     style={isActive ? (isElevate ? { backgroundColor: '#8cd2fe' } : { backgroundColor: '#00A8E8' }) : {}}
                   >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden lg:inline">{item.label}</span>
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden xl:inline">{item.label}</span>
                   </Link>
                 );
               })}
@@ -102,7 +102,7 @@ export default function Navigation() {
             {status === "authenticated" && session?.user?.playerId ? (
               <Link
                 href={`/players/${session.user.playerId}`}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors shadow-sm ml-2"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium text-white transition-colors shadow-sm ml-1 sm:ml-2 whitespace-nowrap"
                 style={isElevate ? 
                   { backgroundColor: '#8cd2fe' } : 
                   { backgroundColor: '#00A8E8' }
@@ -115,31 +115,31 @@ export default function Navigation() {
                     className="w-6 h-6 rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-4 h-4" />
+                  <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 )}
-                <span className="whitespace-nowrap">Profile</span>
+                <span className="hidden sm:inline">Profile</span>
               </Link>
             ) : (
               <button
                 onClick={() => signIn("roblox", { callbackUrl: '/' })}
                 disabled={status === "loading"}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors shadow-sm ml-2 disabled:opacity-50"
+                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium text-white transition-colors shadow-sm ml-1 sm:ml-2 disabled:opacity-50 whitespace-nowrap"
                 style={isElevate ? 
                   { backgroundColor: '#8cd2fe' } : 
                   { backgroundColor: '#00A8E8' }
                 }
               >
-                <User className="w-4 h-4" />
-                <span className="whitespace-nowrap">Log In</span>
+                <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Log In</span>
               </button>
             )}
             
             <Link
               href="/settings"
-              className="ml-2 p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="ml-1 sm:ml-2 p-1.5 sm:p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               aria-label="Settings"
             >
-              <Settings className="w-5 h-5" />
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
           </div>
         </div>
