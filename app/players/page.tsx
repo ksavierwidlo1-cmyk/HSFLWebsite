@@ -9,6 +9,7 @@ export default function PlayersPage() {
   const [players, setPlayers] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -84,15 +85,12 @@ export default function PlayersPage() {
               >
                 <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4">
                   <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {player.profilePicture ? (
+                    {player.profilePicture && !imageErrors.has(player.id) ? (
                       <img
                         src={player.profilePicture}
                         alt={player.displayName}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.parentElement!.innerHTML = '<svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
-                        }}
+                        onError={() => setImageErrors(prev => new Set([...prev, player.id]))}
                       />
                     ) : (
                       <User className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-400" />
