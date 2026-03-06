@@ -96,29 +96,40 @@ export const authOptions: NextAuthOptions = {
         console.log("[ROBLOX AUTH] Starting sign in:", { robloxUsername, robloxId, userId: user.id });
 
         try {
-          // Check if player exists with this Roblox username
+          // Check if player exists with this Roblox User ID (not username, in case they changed their username)
           const { data: existingPlayer } = await supabaseAdmin
             .from("players")
-            .select("id, user_id")
-            .eq("roblox_username", robloxUsername)
+            .select("id, user_id, roblox_username")
+            .eq("roblox_user_id", robloxId)
             .single();
 
           if (existingPlayer) {
             console.log("[ROBLOX AUTH] Found existing player:", existingPlayer.id);
+            
+            // Update username and profile picture in case they changed
+            const updates: any = {
+              profile_picture: robloxAvatar,
+            };
+            
+            // Update username if it changed
+            if (existingPlayer.roblox_username !== robloxUsername) {
+              console.log("[ROBLOX AUTH] Username changed from", existingPlayer.roblox_username, "to", robloxUsername);
+              updates.roblox_username = robloxUsername;
+            }
+            
             // Link user to existing player if not already linked
             if (!existingPlayer.user_id) {
               console.log("[ROBLOX AUTH] Linking user to existing player");
-              await supabaseAdmin
-                .from("players")
-                .update({
-                  user_id: user.id,
-                  roblox_user_id: robloxId,
-                  profile_picture: robloxAvatar,
-                })
-                .eq("id", existingPlayer.id);
+              updates.user_id = user.id;
             } else {
               console.log("[ROBLOX AUTH] Player already linked to user:", existingPlayer.user_id);
             }
+            
+            // Apply updates
+            await supabaseAdmin
+              .from("players")
+              .update(updates)
+              .eq("id", existingPlayer.id);
           } else {
             console.log("[ROBLOX AUTH] Creating new Free Agent player");
             

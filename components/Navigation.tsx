@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Home, Users, Link2, TrendingUp, Calendar, Search, Shield, Sun, Moon, Trophy, Briefcase, Award, User } from 'lucide-react';
+import { Home, Users, Link2, TrendingUp, Calendar, Search, Shield, Settings, Trophy, Briefcase, Award, User } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { useSession, signIn } from 'next-auth/react';
 
@@ -35,7 +35,6 @@ const elevateNavItems = [
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { theme, toggleTheme } = useTheme();
   const { data: session, status } = useSession();
   
   // Determine if we're in Elevate 302 section
@@ -135,13 +134,13 @@ export default function Navigation() {
               </button>
             )}
             
-            <button
-              onClick={toggleTheme}
+            <Link
+              href="/settings"
               className="ml-2 p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle theme"
+              aria-label="Settings"
             >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+              <Settings className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </div>

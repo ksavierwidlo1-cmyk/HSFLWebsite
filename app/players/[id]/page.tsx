@@ -306,6 +306,10 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
                 src={player.profilePicture}
                 alt={player.displayName}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = '<svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                }}
               />
             ) : (
               <User className="w-16 h-16 text-gray-400" />
@@ -364,24 +368,27 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       </div>
 
       {/* Season Selector */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
-        <div className="flex items-center justify-between">
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center space-x-3">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Viewing Stats For:</h3>
             <div className="relative">
               <select
                 value={selectedSeason}
                 onChange={(e) => setSelectedSeason(e.target.value)}
-                className="appearance-none bg-eba-blue text-white px-6 py-2 pr-10 rounded-lg font-medium cursor-pointer hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-eba-blue focus:ring-offset-2"
+                className="appearance-none bg-gradient-to-r from-eba-blue to-blue-600 text-white px-6 py-2.5 pr-10 rounded-xl font-medium cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-eba-blue focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                style={{
+                  minWidth: '200px'
+                }}
               >
-                <option value="All-Time">All-Time</option>
+                <option value="All-Time" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">All-Time</option>
                 {availableSeasons.map((season: any) => (
-                  <option key={season.id} value={season.name}>
+                  <option key={season.id} value={season.name} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                     {season.name}
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white pointer-events-none" />
             </div>
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">

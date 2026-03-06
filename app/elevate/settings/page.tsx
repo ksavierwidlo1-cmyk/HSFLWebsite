@@ -1,0 +1,140 @@
+'use client';
+
+import { Settings as SettingsIcon, Palette, Eye } from 'lucide-react';
+import { useTheme } from '@/components/ThemeProvider';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+
+export default function Elevate302SettingsPage() {
+  const { theme, setTheme } = useTheme();
+  const [showProfilePics, setShowProfilePics] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const storedShowPics = localStorage.getItem('showProfilePics');
+    if (storedShowPics !== null) {
+      setShowProfilePics(storedShowPics === 'true');
+    }
+  }, []);
+
+  const handleShowProfilePicsChange = (value: boolean) => {
+    setShowProfilePics(value);
+    localStorage.setItem('showProfilePics', value.toString());
+  };
+
+  const themes = [
+    { value: 'light', label: 'Light', description: 'Bright and clean', preview: 'bg-white border-gray-300' },
+    { value: 'dark', label: 'Dark', description: 'Easy on the eyes', preview: 'bg-gray-900 border-gray-700' },
+    { value: 'midnight', label: 'Midnight', description: 'Deep blue darkness', preview: 'bg-blue-950 border-blue-900' },
+    { value: 'forest', label: 'Forest', description: 'Nature inspired', preview: 'bg-green-950 border-green-900' },
+    { value: 'sunset', label: 'Sunset', description: 'Warm orange tones', preview: 'bg-orange-950 border-orange-900' },
+    { value: 'ocean', label: 'Ocean', description: 'Cool blue waves', preview: 'bg-cyan-950 border-cyan-900' },
+  ];
+
+  if (!mounted) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center text-gray-600 dark:text-gray-400">Loading settings...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8 flex items-center space-x-4">
+        <Image 
+          src="/elevate302.png" 
+          alt="Elevate 302" 
+          width={60} 
+          height={60}
+          className="rounded-lg"
+        />
+        <div>
+          <h1 className="text-4xl font-bold mb-2 flex items-center" style={{ color: '#8cd2fe' }}>
+            <SettingsIcon className="w-10 h-10 mr-3" />
+            Settings
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">Customize your experience</p>
+        </div>
+      </div>
+
+      {/* Theme Section */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
+        <div className="flex items-center space-x-3 mb-4">
+          <Palette className="w-6 h-6" style={{ color: '#8cd2fe' }} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Theme</h2>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">Choose your preferred color scheme</p>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {themes.map((themeOption) => (
+            <button
+              key={themeOption.value}
+              onClick={() => setTheme(themeOption.value as any)}
+              className={`p-4 rounded-lg border-2 transition-all text-left ${
+                theme === themeOption.value
+                  ? 'bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
+              style={{
+                borderColor: theme === themeOption.value ? '#8cd2fe' : undefined
+              }}
+            >
+              <div className="flex items-center space-x-3 mb-3">
+                <div className={`w-12 h-12 rounded-lg border-2 ${themeOption.preview}`}></div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{themeOption.label}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{themeOption.description}</p>
+                </div>
+              </div>
+              {theme === themeOption.value && (
+                <div className="text-sm font-medium" style={{ color: '#8cd2fe' }}>✓ Currently Active</div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Display Settings */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 mb-6 shadow-sm">
+        <div className="flex items-center space-x-3 mb-4">
+          <Eye className="w-6 h-6" style={{ color: '#8cd2fe' }} />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Display</h2>
+        </div>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">Adjust visual preferences</p>
+        
+        <div className="space-y-4">
+          {/* Profile Pictures Toggle */}
+          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div>
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Show Profile Pictures</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Display player profile pictures throughout the site</p>
+            </div>
+            <button
+              onClick={() => handleShowProfilePicsChange(!showProfilePics)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
+              style={{
+                backgroundColor: showProfilePics ? '#8cd2fe' : undefined
+              }}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showProfilePics ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="border rounded-lg p-4" style={{ backgroundColor: '#8cd2fe20', borderColor: '#8cd2fe' }}>
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          <strong>Note:</strong> Your settings are saved locally in your browser and will persist across sessions.
+        </p>
+      </div>
+    </div>
+  );
+}
