@@ -11,10 +11,11 @@ interface Season {
 
 interface MultiSeasonSelectorProps {
   availableSeasons: Season[];
-  selectedSeasons: string[];
+  selectedSeasons: string[]; // Can be season IDs or season names
   onChange: (seasons: string[]) => void;
   accentColor?: string;
   className?: string;
+  useIds?: boolean; // If true, work with IDs instead of names
 }
 
 export default function MultiSeasonSelector({ 
@@ -22,7 +23,8 @@ export default function MultiSeasonSelector({
   selectedSeasons,
   onChange,
   accentColor = '#00A8E8',
-  className = ''
+  className = '',
+  useIds = false
 }: MultiSeasonSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,22 +41,22 @@ export default function MultiSeasonSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const toggleSeason = (seasonName: string) => {
-    if (seasonName === 'All-Time') {
+  const toggleSeason = (seasonIdentifier: string) => {
+    if (seasonIdentifier === 'All-Time') {
       // If All-Time is selected, clear all other selections
       onChange(['All-Time']);
     } else {
       // Remove All-Time if it exists
       const newSelections = selectedSeasons.filter(s => s !== 'All-Time');
       
-      if (newSelections.includes(seasonName)) {
+      if (newSelections.includes(seasonIdentifier)) {
         // Remove the season
-        const updated = newSelections.filter(s => s !== seasonName);
+        const updated = newSelections.filter(s => s !== seasonIdentifier);
         // If no seasons left, default to All-Time
         onChange(updated.length === 0 ? ['All-Time'] : updated);
       } else {
         // Add the season
-        onChange([...newSelections, seasonName]);
+        onChange([...newSelections, seasonIdentifier]);
       }
     }
   };
@@ -64,7 +66,11 @@ export default function MultiSeasonSelector({
   };
 
   const selectAll = () => {
-    onChange(['All-Time', ...availableSeasons.map(s => s.name)]);
+    if (useIds) {
+      onChange(availableSeasons.map(s => s.id));
+    } else {
+      onChange(['All-Time', ...availableSeasons.map(s => s.name)]);
+    }
   };
 
   const getDisplayText = () => {
@@ -78,7 +84,10 @@ export default function MultiSeasonSelector({
       return 'Select Seasons';
     }
     if (selectedSeasons.length === 1) {
-      return selectedSeasons[0];
+      const season = availableSeasons.find(s => 
+        useIds ? s.id === selectedSeasons[0] : s.name === selectedSeasons[0]
+      );
+      return season?.name || selectedSeasons[0];
     }
     return `${selectedSeasons.length} Seasons Selected`;
   };
@@ -101,12 +110,13 @@ export default function MultiSeasonSelector({
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden min-w-[200px] sm:min-w-[250px]">
           {/* Header with Actions */}
-          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
             <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">SELECT SEASONS</span>
             <div className="flex gap-2">
               <button
                 onClick={(e) => { e.stopPropagation(); clearAll(); }}
-                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="text-xs font-medium hover:opacity-80 transition-opacity"
+                style={{ color: accentColor }}
               >
                 Clear
               </button>
@@ -122,80 +132,95 @@ export default function MultiSeasonSelector({
 
           {/* Season Options */}
           <div className="max-h-[300px] overflow-y-auto">
-            {/* All-Time Option */}
-            <label
-              className="flex items-center px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={selectedSeasons.includes('All-Time') && selectedSeasons.length === 1}
-                onChange={() => toggleSeason('All-Time')}
-                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 focus:ring-2 cursor-pointer"
-                style={{ 
-                  accentColor: accentColor,
-                }}
-                onClick={(e) => e.stopPropagation()}
-              />
-              <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                All-Time
-              </span>
-            </label>
-
-            {/* Individual Seasons */}
-            {availableSeasons.map((season) => (
+            {/* All-Time Option - only show if not using IDs */}
+            {!useIds && (
               <label
-                key={season.id}
-                className="flex items-center px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-750 cursor-pointer transition-colors"
+                className="flex items-center px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
               >
                 <input
                   type="checkbox"
-                  checked={selectedSeasons.includes(season.name) && !selectedSeasons.includes('All-Time')}
-                  onChange={() => toggleSeason(season.name)}
-                  disabled={selectedSeasons.includes('All-Time') && selectedSeasons.length === 1}
-                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 focus:ring-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ accentColor: accentColor }}
+                  checked={selectedSeasons.includes('All-Time') && selectedSeasons.length === 1}
+                  onChange={() => toggleSeason('All-Time')}
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 focus:ring-2 cursor-pointer"
+                  style={{ 
+                    accentColor: accentColor,
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 />
-                <span className="ml-3 text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                  {season.name}
-                  {season.isCurrent && (
-                    <span 
-                      className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ 
-                        backgroundColor: `${accentColor}20`,
-                        color: accentColor 
-                      }}
-                    >
-                      Current
-                    </span>
-                  )}
+                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                  All-Time
                 </span>
               </label>
-            ))}
+            )}
+
+            {/* Individual Seasons */}
+            {availableSeasons.map((season) => {
+              const seasonIdentifier = useIds ? season.id : season.name;
+              const isChecked = useIds 
+                ? selectedSeasons.includes(season.id)
+                : selectedSeasons.includes(season.name) && !selectedSeasons.includes('All-Time');
+              
+              return (
+                <label
+                  key={season.id}
+                  className="flex items-center px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => toggleSeason(seasonIdentifier)}
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 focus:ring-2 cursor-pointer"
+                    style={{ accentColor: accentColor }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <span className="ml-3 text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    {season.name}
+                    {season.isCurrent && (
+                      <span 
+                        className="text-xs px-2 py-0.5 rounded-full font-medium"
+                        style={{ 
+                          backgroundColor: `${accentColor}20`,
+                          color: accentColor 
+                        }}
+                      >
+                        Current
+                      </span>
+                    )}
+                  </span>
+                </label>
+              );
+            })}
           </div>
 
           {/* Selected Pills (when multiple selected) */}
           {selectedSeasons.length > 1 && !selectedSeasons.includes('All-Time') && (
-            <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
+            <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
               <div className="flex flex-wrap gap-1.5">
-                {selectedSeasons.map((season) => (
-                  <span
-                    key={season}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-white"
-                    style={{ backgroundColor: accentColor }}
-                  >
-                    {season}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleSeason(season);
-                      }}
-                      className="hover:bg-black/20 rounded-full p-0.5 transition-colors"
+                {selectedSeasons.map((seasonId) => {
+                  const season = availableSeasons.find(s => 
+                    useIds ? s.id === seasonId : s.name === seasonId
+                  );
+                  const displayName = season?.name || seasonId;
+                  
+                  return (
+                    <span
+                      key={seasonId}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium text-white"
+                      style={{ backgroundColor: accentColor }}
                     >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                ))}
+                      {displayName}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleSeason(seasonId);
+                        }}
+                        className="hover:bg-black/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}

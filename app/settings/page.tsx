@@ -1,11 +1,13 @@
 'use client';
 
-import { Settings as SettingsIcon, Palette, Eye } from 'lucide-react';
+import { Settings as SettingsIcon, Palette, Eye, LogOut, User as UserIcon } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useState, useEffect } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
   const [showProfilePics, setShowProfilePics] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -114,6 +116,61 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Account Settings */}
+      {session?.user && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+          <div className="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+            <UserIcon className="w-5 h-5 sm:w-6 sm:h-6 text-eba-blue" />
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Account</h2>
+          </div>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">Manage your account settings</p>
+          
+          <div className="space-y-4">
+            {/* Current Account Info */}
+            <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="flex items-center space-x-3 mb-3">
+                {session.user.image && (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || 'User'}
+                    className="w-12 h-12 rounded-full"
+                  />
+                )}
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">
+                    {session.user.name || 'User'}
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {session.user.isAdmin ? 'Admin Account' : 'Player Account'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <div className="flex items-center justify-between p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-1">
+                  Sign Out
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  {session.user.isAdmin 
+                    ? 'Log out of your admin account' 
+                    : 'Disconnect your Roblox account from this device'}
+                </p>
+              </div>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

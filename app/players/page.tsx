@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, User } from 'lucide-react';
+import { Search, User, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
@@ -10,6 +10,7 @@ export default function PlayersPage() {
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('all');
 
   useEffect(() => {
     fetchData();
@@ -34,10 +35,21 @@ export default function PlayersPage() {
     }
   };
 
-  const filteredPlayers = players.filter(player =>
-    player.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    player.robloxUsername.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredPlayers = players.filter(player => {
+    // Search filter
+    const matchesSearch = player.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      player.robloxUsername.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Team filter
+    let matchesTeam = true;
+    if (selectedTeamId === 'free-agent') {
+      matchesTeam = !player.teamId;
+    } else if (selectedTeamId !== 'all') {
+      matchesTeam = player.teamId === selectedTeamId;
+    }
+    
+    return matchesSearch && matchesTeam;
+  });
 
   if (loading) {
     return (
@@ -57,8 +69,9 @@ export default function PlayersPage() {
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">Find and view player profiles</p>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6 sm:mb-8">
+      {/* Search and Filter */}
+      <div className="mb-6 sm:mb-8 space-y-4">
+        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
           <input
@@ -68,6 +81,24 @@ export default function PlayersPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 text-sm sm:text-base bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue transition-colors text-gray-900 dark:text-white shadow-sm"
           />
+        </div>
+
+        {/* Team Filter */}
+        <div className="flex items-center gap-3">
+          <Filter className="w-5 h-5 text-gray-400 flex-shrink-0" />
+          <select
+            value={selectedTeamId}
+            onChange={(e) => setSelectedTeamId(e.target.value)}
+            className="flex-1 sm:flex-none sm:min-w-[250px] px-4 py-3 text-sm sm:text-base bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue transition-colors text-gray-900 dark:text-white shadow-sm"
+          >
+            <option value="all">All Teams</option>
+            <option value="free-agent">Free Agents</option>
+            {teams.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

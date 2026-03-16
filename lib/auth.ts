@@ -91,9 +91,21 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "roblox" && profile) {
         const robloxUsername = (profile as any).preferred_username || (profile as any).name;
         const robloxId = (profile as any).sub;
-        const robloxAvatar = (profile as any).picture;
 
         console.log("[ROBLOX AUTH] Starting sign in:", { robloxUsername, robloxId, userId: user.id });
+
+        // Fetch fresh profile picture from Roblox Thumbnails API (more reliable than OAuth picture)
+        let robloxAvatar = '';
+        try {
+          const thumbResponse = await fetch(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robloxId}&size=150x150&format=Png&isCircular=false`);
+          const thumbData = await thumbResponse.json();
+          if (thumbData.data && thumbData.data.length > 0) {
+            robloxAvatar = thumbData.data[0].imageUrl;
+            console.log("[ROBLOX AUTH] Fetched profile picture from Thumbnails API");
+          }
+        } catch (err) {
+          console.error("[ROBLOX AUTH] Failed to fetch profile picture:", err);
+        }
 
         try {
           // Check if player exists with this Roblox User ID (not username, in case they changed their username)
@@ -107,9 +119,12 @@ export const authOptions: NextAuthOptions = {
             console.log("[ROBLOX AUTH] Found existing player:", existingPlayer.id);
             
             // Update username and profile picture in case they changed
-            const updates: any = {
-              profile_picture: robloxAvatar,
-            };
+            const updates: any = {};
+            
+            // Always update profile picture to ensure fresh URL
+            if (robloxAvatar) {
+              updates.profile_picture = robloxAvatar;
+            }
             
             // Update username if it changed
             if (existingPlayer.roblox_username !== robloxUsername) {
@@ -125,11 +140,13 @@ export const authOptions: NextAuthOptions = {
               console.log("[ROBLOX AUTH] Player already linked to user:", existingPlayer.user_id);
             }
             
-            // Apply updates
-            await supabaseAdmin
-              .from("players")
-              .update(updates)
-              .eq("id", existingPlayer.id);
+            // Apply updates only if there are any
+            if (Object.keys(updates).length > 0) {
+              await supabaseAdmin
+                .from("players")
+                .update(updates)
+                .eq("id", existingPlayer.id);
+            }
           } else {
             console.log("[ROBLOX AUTH] Creating new Free Agent player");
             

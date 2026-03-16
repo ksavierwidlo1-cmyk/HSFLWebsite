@@ -11,6 +11,22 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Fetch team seasons for all teams
+  const { data: teamSeasons } = await supabaseAdmin
+    .from('team_seasons')
+    .select('team_id, season_id, seasons(id, name)');
+
+  // Group seasons by team ID
+  const seasonsByTeam: Record<string, any[]> = {};
+  teamSeasons?.forEach((ts: any) => {
+    if (!seasonsByTeam[ts.team_id]) {
+      seasonsByTeam[ts.team_id] = [];
+    }
+    if (ts.seasons) {
+      seasonsByTeam[ts.team_id].push(ts.seasons);
+    }
+  });
+
   // Transform snake_case to camelCase
   const formattedTeams = teams?.map(team => ({
     id: team.id,
@@ -28,6 +44,7 @@ export async function GET() {
       primary: team.primary_color,
       secondary: team.secondary_color,
     },
+    seasons: seasonsByTeam[team.id] || [],
   })) || [];
 
   return NextResponse.json(formattedTeams);
@@ -62,6 +79,18 @@ export async function POST(request: Request) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Handle season assignments
+    if (body.seasonIds && body.seasonIds.length > 0) {
+      const teamSeasonInserts = body.seasonIds.map((seasonId: string) => ({
+        team_id: data.id,
+        season_id: seasonId,
+      }));
+      
+      await supabaseAdmin
+        .from('team_seasons')
+        .insert(teamSeasonInserts);
     }
 
     const formattedTeam = {
@@ -127,6 +156,27 @@ export async function PUT(request: Request) {
         { error: 'Team not found' },
         { status: 404 }
       );
+    }
+
+    // Handle season assignments if provided
+    if (updates.seasonIds !== undefined) {
+      // Delete existing season assignments
+      await supabaseAdmin
+        .from('team_seasons')
+        .delete()
+        .eq('team_id', id);
+
+      // Insert new season assignments
+      if (updates.seasonIds.length > 0) {
+        const teamSeasonInserts = updates.seasonIds.map((seasonId: string) => ({
+          team_id: id,
+          season_id: seasonId,
+        }));
+        
+        await supabaseAdmin
+          .from('team_seasons')
+          .insert(teamSeasonInserts);
+      }
     }
 
     const formattedTeam = {

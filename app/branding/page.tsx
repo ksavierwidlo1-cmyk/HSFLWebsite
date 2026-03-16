@@ -4,34 +4,60 @@ import { Users, Shield, Award } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 type ConferenceFilter = 'all' | 'Eastern' | 'Western';
 
 export default function BrandingPage() {
   const [teams, setTeams] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [conferenceFilter, setConferenceFilter] = useState<ConferenceFilter>('all');
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
 
   useEffect(() => {
-    fetchTeams();
+    fetchData();
   }, []);
 
-  const fetchTeams = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch('/api/teams');
-      const data = await res.json();
-      setTeams(data);
+      const [teamsRes, seasonsRes] = await Promise.all([
+        fetch('/api/teams'),
+        fetch('/api/seasons')
+      ]);
+      const [teamsData, seasonsData] = await Promise.all([
+        teamsRes.json(),
+        seasonsRes.json()
+      ]);
+      setTeams(teamsData);
+      setSeasons(seasonsData);
     } catch (error) {
-      console.error('Error fetching teams:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter teams by conference
+  // Filter teams by conference and season
   const filteredTeams = teams.filter(team => {
-    if (conferenceFilter === 'all') return true;
-    return team.conference === conferenceFilter;
+    // Conference filter
+    if (conferenceFilter !== 'all' && team.conference !== conferenceFilter) {
+      return false;
+    }
+    
+    // Season filter
+    if (!selectedSeasons.includes('All-Time')) {
+      // Check if team has any of the selected seasons
+      const teamSeasonNames = team.seasons?.map((s: any) => s.name) || [];
+      const hasSelectedSeason = selectedSeasons.some(seasonName => 
+        teamSeasonNames.includes(seasonName)
+      );
+      if (!hasSelectedSeason) {
+        return false;
+      }
+    }
+    
+    return true;
   });
 
   if (loading) {
@@ -48,38 +74,54 @@ export default function BrandingPage() {
         <p className="text-gray-600 dark:text-gray-400">Meet the teams and leadership of the Elite Basketball Association</p>
       </div>
 
-      {/* Conference Filter */}
-      <div className="mb-6 flex space-x-2">
-        <button
-          onClick={() => setConferenceFilter('all')}
-          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-            conferenceFilter === 'all'
-              ? 'bg-eba-blue text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
-          }`}
-        >
-          All Teams
-        </button>
-        <button
-          onClick={() => setConferenceFilter('Eastern')}
-          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-            conferenceFilter === 'Eastern'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-blue-300 dark:border-gray-600'
-          }`}
-        >
-          Eastern Conference
-        </button>
-        <button
-          onClick={() => setConferenceFilter('Western')}
-          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-            conferenceFilter === 'Western'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-700 border border-red-300 dark:border-gray-600'
-          }`}
-        >
-          Western Conference
-        </button>
+      {/* Filters */}
+      <div className="mb-6 space-y-4">
+        {/* Conference Filter */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setConferenceFilter('all')}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              conferenceFilter === 'all'
+                ? 'bg-eba-blue text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            All Teams
+          </button>
+          <button
+            onClick={() => setConferenceFilter('Eastern')}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              conferenceFilter === 'Eastern'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-blue-300 dark:border-gray-600'
+            }`}
+          >
+            Eastern Conference
+          </button>
+          <button
+            onClick={() => setConferenceFilter('Western')}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              conferenceFilter === 'Western'
+                ? 'bg-red-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-700 border border-red-300 dark:border-gray-600'
+            }`}
+          >
+            Western Conference
+          </button>
+        </div>
+
+        {/* Season Filter */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+            Filter by Season:
+          </span>
+          <MultiSeasonSelector
+            availableSeasons={seasons.map(s => ({ id: s.id, name: s.name, isCurrent: s.isCurrent }))}
+            selectedSeasons={selectedSeasons}
+            onChange={setSelectedSeasons}
+            accentColor="#00A8E8"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

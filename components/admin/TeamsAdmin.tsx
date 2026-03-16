@@ -4,11 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Users, Upload, X as XIcon } from 'lucide-react';
 import { uploadImage } from '@/lib/supabase-storage';
 import Image from 'next/image';
+import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
 export default function TeamsAdmin() {
   const [showForm, setShowForm] = useState(false);
   const [editingTeam, setEditingTeam] = useState<any>(null);
   const [teams, setTeams] = useState<any[]>([]);
+  const [seasons, setSeasons] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Form state
@@ -21,13 +23,29 @@ export default function TeamsAdmin() {
   const [conference, setConference] = useState<'Eastern' | 'Western'>('Eastern');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
+  const [selectedSeasonIds, setSelectedSeasonIds] = useState<string[]>([]);
 
-  // Fetch teams on mount
+  // Fetch teams and seasons on mount
   useEffect(() => {
     fetchTeams();
+    fetchSeasons();
   }, []);
 
-  const fetchTeams = async () => {
+  const fetchSeasons = async () => {
+    try {
+      const response = await fetch('/api/seasons');
+      const data = await response.json();
+      setSeasons(data);
+      // Default to all seasons
+      if (data.length > 0 && !editingTeam) {
+        setSelectedSeasonIds(data.map((s: any) => s.id));
+      }
+    } catch (error) {
+      console.error('Failed to fetch seasons:', error);
+    }
+  };
+
+  const fetchTeams = async () {
     try {
       const response = await fetch('/api/teams');
       const data = await response.json();
@@ -86,6 +104,7 @@ export default function TeamsAdmin() {
           owner,
           headCoach,
           conference,
+          seasonIds: selectedSeasonIds,
         }),
       });
 
@@ -138,6 +157,7 @@ export default function TeamsAdmin() {
     setConference('Eastern');
     setLogoFile(null);
     setLogoPreview('');
+    setSelectedSeasonIds(seasons.map(s => s.id)); // Default to all seasons
     setShowForm(false);
     setEditingTeam(null);
   };
@@ -152,6 +172,7 @@ export default function TeamsAdmin() {
     setHeadCoach(team.headCoach);
     setConference(team.conference || 'Eastern');
     setLogoPreview(team.logo || '');
+    setSelectedSeasonIds(team.seasons?.map((s: any) => s.id) || []);
     setShowForm(true);
   };
 
@@ -331,6 +352,24 @@ export default function TeamsAdmin() {
                 <option value="Eastern">Eastern Conference</option>
                 <option value="Western">Western Conference</option>
               </select>
+            </div>
+
+            {/* Seasons Multi-Select */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Seasons
+              </label>
+              <MultiSeasonSelector
+                availableSeasons={seasons.map(s => ({ id: s.id, name: s.name, isCurrent: s.isCurrent }))}
+                selectedSeasons={selectedSeasonIds}
+                onChange={setSelectedSeasonIds}
+                accentColor={primaryColor}
+                className="w-full"
+                useIds={true}
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Select which seasons this team participates in
+              </p>
             </div>
           </div>
 
