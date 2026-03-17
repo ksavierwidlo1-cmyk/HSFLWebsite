@@ -43,7 +43,7 @@ const nextConfig = {
               img-src 'self' data: blob: https: *.roblox.com *.rbxcdn.com *.supabase.co cdn.discordapp.com;
               font-src 'self' data:;
               connect-src 'self' https://*.supabase.co https://apis.roblox.com wss://*.supabase.co;
-              frame-src 'self';
+              frame-src 'self' https://www.youtube.com https://player.twitch.tv https://player.vimeo.com;
             `.replace(/\s+/g, ' ').trim(),
           },
         ],
