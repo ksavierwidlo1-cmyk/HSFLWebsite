@@ -25,12 +25,6 @@ export default function TeamsAdmin() {
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [selectedSeasonIds, setSelectedSeasonIds] = useState<string[]>([]);
 
-  // Fetch teams and seasons on mount
-  useEffect(() => {
-    fetchTeams();
-    fetchSeasons();
-  }, []);
-
   const fetchSeasons = async () => {
     try {
       const response = await fetch('/api/seasons');
@@ -54,6 +48,12 @@ export default function TeamsAdmin() {
       console.error('Failed to fetch teams:', error);
     }
   };
+
+  // Fetch teams and seasons on mount
+  useEffect(() => {
+    fetchTeams();
+    fetchSeasons();
+  }, []);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
