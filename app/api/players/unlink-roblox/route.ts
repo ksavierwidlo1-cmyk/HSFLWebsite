@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST() {
   try {
@@ -11,24 +10,11 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized - Please log in' }, { status: 401 });
     }
 
-    // Unlink Roblox account by clearing roblox-related fields
-    const { error } = await supabaseAdmin
-      .from('players')
-      .update({
-        roblox_user_id: null,
-        roblox_username: null,
-        profile_picture: null,
-      })
-      .eq('id', session.user.playerId);
-
-    if (error) {
-      console.error('Error unlinking Roblox account:', error);
-      return NextResponse.json({ error: 'Failed to unlink Roblox account' }, { status: 500 });
-    }
-
+    // Unlinking Roblox just means ending the session
+    // The actual logout happens on the client side with signOut()
     return NextResponse.json({ 
       success: true, 
-      message: 'Roblox account unlinked successfully' 
+      message: 'Ready to unlink - logging out...' 
     });
   } catch (error) {
     console.error('Error in POST /api/players/unlink-roblox:', error);
