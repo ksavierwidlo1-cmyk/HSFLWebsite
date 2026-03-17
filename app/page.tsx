@@ -12,7 +12,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   
   // Configure your intro video here - can be YouTube, Vimeo, or direct video URL
-  const introVideoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Replace with your video URL
+  const introVideoUrl = "https://www.youtube.com/embed/npCVD0Pv-3U"; // Replace with your video URL
 
   useEffect(() => {
     fetchData();
