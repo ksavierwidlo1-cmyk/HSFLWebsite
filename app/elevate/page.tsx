@@ -70,11 +70,11 @@ export default function ElevateHome() {
               <div>
                 <h1 className="text-5xl font-bold mb-3">Elevate 302</h1>
                 <p className="text-xl text-cyan-100 mb-6">
-                  Delaware's premier youth basketball league
+                  Elevate 302 is EBA's official development league where free agents compete in league-run games to showcase their skills and earn a spot on a main roster.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link
-                    href="/elevate/teams"
+                    href="/elevate/branding"
                     className="px-6 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-cyan-50 transition-colors inline-flex items-center gap-2"
                   >
                     <Users className="w-5 h-5" />
