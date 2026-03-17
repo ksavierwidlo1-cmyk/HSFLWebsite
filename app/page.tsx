@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, ChevronRight, Radio, ExternalLink } from 'lucide-react';
+import { Calendar, ChevronRight, Radio, ExternalLink, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -8,6 +8,7 @@ export default function Home() {
   const [articles, setArticles] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
+  const [players, setPlayers] = useState<any[]>([]);
   const [liveStream, setLiveStream] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
@@ -20,21 +21,24 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const [articlesRes, gamesRes, teamsRes, streamRes] = await Promise.all([
+      const [articlesRes, gamesRes, teamsRes, playersRes, streamRes] = await Promise.all([
         fetch('/api/articles'),
         fetch('/api/games'),
         fetch('/api/teams'),
+        fetch('/api/players'),
         fetch('/api/live-stream')
       ]);
-      const [articlesData, gamesData, teamsData, streamData] = await Promise.all([
+      const [articlesData, gamesData, teamsData, playersData, streamData] = await Promise.all([
         articlesRes.json(),
         gamesRes.json(),
         teamsRes.json(),
+        playersRes.json(),
         streamRes.json()
       ]);
       setArticles(articlesData);
       setGames(gamesData);
       setTeams(teamsData);
+      setPlayers(playersData);
       setLiveStream(streamData.stream);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -51,6 +55,11 @@ export default function Home() {
   const latestArticles = articles
     .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime())
     .slice(0, 3);
+
+  const topPlayers = players
+    .filter(p => p.stats && p.stats.gamesPlayed > 0)
+    .sort((a, b) => (b.stats?.points || 0) - (a.stats?.points || 0))
+    .slice(0, 5);
 
   if (loading) {
     return (
@@ -189,54 +198,117 @@ export default function Home() {
 
         {/* Sidebar - Upcoming Games */}
         <div className="lg:col-span-1">
-          <div className="sticky top-4">
-            <h2 className="text-2xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-              <Calendar className="w-6 h-6 mr-2 text-eba-blue" />
-              Upcoming Games
-            </h2>
-            
-            <div className="space-y-3">
-              {upcomingGames.length > 0 ? (
-                upcomingGames.map((game) => {
-                  const homeTeam = teams.find(t => t.id === game.homeTeamId);
-                  const awayTeam = teams.find(t => t.id === game.awayTeamId);
-                  
-                  return (
-                    <Link
-                      key={game.id}
-                      href={`/games/${game.id}`}
-                      className="block bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-eba-blue dark:hover:border-eba-blue transition-colors shadow-sm"
-                    >
-                      <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                        {new Date(game.scheduledDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900 dark:text-white">{awayTeam?.name || 'TBD'}</div>
-                          <div className="text-gray-600 dark:text-gray-400 text-sm">@ {homeTeam?.name || 'TBD'}</div>
+          <div className="sticky top-4 space-y-6">
+            {/* Upcoming Games */}
+            <div>
+              <h2 className="text-2xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
+                <Calendar className="w-6 h-6 mr-2 text-eba-blue" />
+                Upcoming Games
+              </h2>
+              
+              <div className="space-y-3">
+                {upcomingGames.length > 0 ? (
+                  upcomingGames.map((game) => {
+                    const homeTeam = teams.find(t => t.id === game.homeTeamId);
+                    const awayTeam = teams.find(t => t.id === game.awayTeamId);
+                    
+                    return (
+                      <Link
+                        key={game.id}
+                        href={`/games/${game.id}`}
+                        className="block bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-eba-blue dark:hover:border-eba-blue transition-colors shadow-sm"
+                      >
+                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                          {new Date(game.scheduledDate).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-900 dark:text-white">{awayTeam?.name || 'TBD'}</div>
+                            <div className="text-gray-600 dark:text-gray-400 text-sm">@ {homeTeam?.name || 'TBD'}</div>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                        </div>
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 shadow-sm">
+                    No upcoming games scheduled
+                  </div>
+                )}
+                
+                <Link
+                  href="/games"
+                  className="block text-center py-3 px-4 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-sm"
+                >
+                  View Full Schedule
+                </Link>
+              </div>
+            </div>
+
+            {/* League Stats */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
+                <div className="text-3xl font-bold text-eba-blue">{teams.length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Teams</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
+                <div className="text-3xl font-bold text-eba-blue">{players.length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Players</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
+                <div className="text-3xl font-bold text-eba-blue">{games.length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Games</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
+                <div className="text-3xl font-bold text-eba-blue">
+                  {games.filter(g => g.status === 'scheduled').length}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Upcoming</div>
+              </div>
+            </div>
+
+            {/* Top Scorers */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                <TrendingUp className="w-5 h-5 text-eba-blue" />
+                Top Scorers
+              </h2>
+              {topPlayers.length > 0 ? (
+                <div className="space-y-3">
+                  {topPlayers.map((player, index) => (
+                    <Link
+                      key={player.id}
+                      href={`/players/${player.id}`}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center font-bold text-eba-blue">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                          {player.displayName}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {teams.find(t => t.id === player.teamId)?.abbreviation || 'FA'}
+                        </div>
+                      </div>
+                      <div className="text-lg font-bold text-eba-blue">
+                        {player.stats?.points?.toFixed(1) || '0.0'}
                       </div>
                     </Link>
-                  );
-                })
-              ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 shadow-sm">
-                  No upcoming games scheduled
+                  ))}
                 </div>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
+                  No player data yet
+                </p>
               )}
-              
-              <Link
-                href="/games"
-                className="block text-center py-3 px-4 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-sm"
-              >
-                View Full Schedule
-              </Link>
             </div>
           </div>
         </div>
