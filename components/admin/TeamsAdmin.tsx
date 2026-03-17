@@ -39,7 +39,7 @@ export default function TeamsAdmin() {
     }
   };
 
-  const fetchTeams = async () {
+  const fetchTeams = async () => {
     try {
       const response = await fetch('/api/teams');
       const data = await response.json();
