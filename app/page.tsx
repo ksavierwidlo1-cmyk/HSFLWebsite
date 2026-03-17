@@ -10,6 +10,9 @@ export default function Home() {
   const [teams, setTeams] = useState<any[]>([]);
   const [liveStream, setLiveStream] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Configure your intro video here - can be YouTube, Vimeo, or direct video URL
+  const introVideoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"; // Replace with your video URL
 
   useEffect(() => {
     fetchData();
@@ -59,6 +62,31 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Hero Intro Video */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg p-1 shadow-xl">
+          <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+            <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+              <iframe
+                src={introVideoUrl}
+                className="absolute top-0 left-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="EBA Introduction Video"
+              ></iframe>
+            </div>
+            <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-700">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Welcome to the Elite Basketball Association
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300">
+                Experience the most competitive Roblox basketball league. Watch highlights, follow your favorite teams, and witness elite competition.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content - News and Articles */}
         <div className="lg:col-span-2 space-y-6">
