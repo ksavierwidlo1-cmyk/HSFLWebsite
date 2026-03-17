@@ -148,26 +148,62 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Logout Button */}
-            <div className="flex items-center justify-between p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-1">
-                  Sign Out
-                </h3>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                  {session.user.isAdmin 
-                    ? 'Log out of your admin account' 
-                    : 'Disconnect your Roblox account from this device'}
-                </p>
+            {/* Unlink Roblox Account (for players with Roblox accounts) */}
+            {session.user.playerId && session.user.playerName && (
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-1">
+                    Unlink Roblox Account
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    Disconnect {session.user.playerName} from your profile
+                  </p>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (confirm('Are you sure you want to unlink your Roblox account? You will need to sign in again to link it.')) {
+                      try {
+                        const res = await fetch('/api/players/unlink-roblox', { method: 'POST' });
+                        if (res.ok) {
+                          alert('Roblox account unlinked successfully');
+                          signOut({ callbackUrl: '/' });
+                        } else {
+                          const error = await res.json();
+                          alert(error.error || 'Failed to unlink account');
+                        }
+                      } catch (error) {
+                        alert('Failed to unlink account');
+                      }
+                    }
+                  }}
+                  className="flex items-center space-x-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Unlink</span>
+                </button>
               </div>
-              <button
-                onClick={() => signOut({ callbackUrl: '/' })}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
-            </div>
+            )}
+
+            {/* Admin Sign Out (only for admins) */}
+            {session.user.isAdmin && (
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white mb-1">
+                    Sign Out
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    Log out of your admin account
+                  </p>
+                </div>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
