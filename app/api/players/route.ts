@@ -1,6 +1,40 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
+// Helper function to fetch fresh avatar URLs from Roblox
+async function fetchAvatarUrls(userIds: string[]): Promise<Map<string, string>> {
+  const avatarMap = new Map<string, string>();
+  
+  if (userIds.length === 0) return avatarMap;
+  
+  try {
+    // Roblox API supports up to 100 user IDs per request
+    const chunks = [];
+    for (let i = 0; i < userIds.length; i += 100) {
+      chunks.push(userIds.slice(i, i + 100));
+    }
+    
+    for (const chunk of chunks) {
+      const response = await fetch(
+        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${chunk.join(',')}&size=150x150&format=Png&isCircular=false`
+      );
+      const data = await response.json();
+      
+      if (data.data && Array.isArray(data.data)) {
+        for (const item of data.data) {
+          if (item.targetId && item.imageUrl) {
+            avatarMap.set(item.targetId.toString(), item.imageUrl);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching avatars:', error);
+  }
+  
+  return avatarMap;
+}
+
 export async function GET() {
   const { data: players, error } = await supabaseAdmin
     .from('players')
@@ -11,13 +45,17 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Fetch fresh avatar URLs for all players
+  const userIds = players?.filter(p => p.roblox_user_id).map(p => p.roblox_user_id) || [];
+  const avatarUrls = await fetchAvatarUrls(userIds);
+
   // Transform snake_case to camelCase
   const formattedPlayers = players?.map(player => ({
     id: player.id,
     displayName: player.display_name,
     robloxUsername: player.roblox_username,
     robloxUserId: player.roblox_user_id,
-    profilePicture: player.profile_picture,
+    profilePicture: player.roblox_user_id ? (avatarUrls.get(player.roblox_user_id) || player.profile_picture) : player.profile_picture,
     description: player.description,
     discordUsername: player.discord_username,
     teamId: player.team_id,

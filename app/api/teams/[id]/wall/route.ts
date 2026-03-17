@@ -3,6 +3,23 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 
+// Helper function to fetch fresh avatar URL from Roblox
+async function fetchAvatarUrl(userId: string): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`
+    );
+    const data = await response.json();
+    
+    if (data.data && data.data.length > 0 && data.data[0].imageUrl) {
+      return data.data[0].imageUrl;
+    }
+  } catch (error) {
+    console.error('Error fetching avatar:', error);
+  }
+  return null;
+}
+
 // GET - Get wall posts for a team
 export async function GET(
   request: NextRequest,
@@ -21,6 +38,7 @@ export async function GET(
           id,
           display_name,
           roblox_username,
+          roblox_user_id,
           profile_picture,
           roles
         )
@@ -32,6 +50,28 @@ export async function GET(
     if (error) {
       console.error('Error fetching wall posts:', error);
       return NextResponse.json({ error: 'Failed to fetch wall posts' }, { status: 500 });
+    }
+
+    // Fetch fresh avatar URLs for all players in posts
+    if (posts && posts.length > 0) {
+      const postsWithFreshAvatars = await Promise.all(
+        posts.map(async (post) => {
+          if (post.players?.roblox_user_id) {
+            const freshAvatar = await fetchAvatarUrl(post.players.roblox_user_id);
+            if (freshAvatar) {
+              return {
+                ...post,
+                players: {
+                  ...post.players,
+                  profile_picture: freshAvatar,
+                },
+              };
+            }
+          }
+          return post;
+        })
+      );
+      return NextResponse.json({ posts: postsWithFreshAvatars });
     }
 
     return NextResponse.json({ posts });
@@ -93,6 +133,7 @@ export async function POST(
           id,
           display_name,
           roblox_username,
+          roblox_user_id,
           profile_picture,
           roles
         )
@@ -102,6 +143,14 @@ export async function POST(
     if (error) {
       console.error('Error creating wall post:', error);
       return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
+    }
+
+    // Fetch fresh avatar URL for the post author
+    if (data.players?.roblox_user_id) {
+      const freshAvatar = await fetchAvatarUrl(data.players.roblox_user_id);
+      if (freshAvatar) {
+        data.players.profile_picture = freshAvatar;
+      }
     }
 
     return NextResponse.json(data);
