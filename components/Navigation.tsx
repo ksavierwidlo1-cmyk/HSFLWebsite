@@ -17,11 +17,12 @@ const ebaNavItems = [
   { href: '/games', label: 'Games', icon: Calendar },
   { href: '/players', label: 'Players', icon: Search },
   { href: '/staff', label: 'Staff', icon: Briefcase },
+  { href: '/elevate', label: 'Elevate', icon: TrendingUp },
   { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
 const elevateNavItems = [
-  { href: '/', label: 'Home', icon: Home },
+  { href: '/elevate', label: 'Home', icon: Home },
   { href: '/elevate/branding', label: 'Branding', icon: Users },
   { href: '/elevate/links', label: 'Links', icon: Link2 },
   { href: '/elevate/standings', label: 'Standings', icon: Trophy },
@@ -46,7 +47,7 @@ export default function Navigation() {
       <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex items-center justify-between min-h-14 sm:min-h-16 py-1 sm:py-2">
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
+            <Link href={isElevate ? "/elevate" : "/"} className="flex items-center space-x-2 sm:space-x-3">
               <div className="relative w-8 h-8 sm:w-10 sm:h-10">
                 <Image
                   src={isElevate ? "/elevate302.png" : "/logo.png"}
@@ -59,18 +60,6 @@ export default function Navigation() {
               <span className="font-bold text-base sm:text-xl text-gray-900 dark:text-white hidden md:block">
                 {isElevate ? "Elevate 302" : "Elite Basketball Association"}
               </span>
-            </Link>
-            
-            {/* League Switcher */}
-            <Link
-              href={isElevate ? "/branding" : "/elevate/branding"}
-              className="px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-colors border-2 hidden xs:block"
-              style={isElevate ? 
-                { borderColor: '#8cd2fe', color: '#8cd2fe' } : 
-                { borderColor: '#00A8E8', color: '#00A8E8' }
-              }
-            >
-              {isElevate ? "→ EBA" : "→ Elevate 302"}
             </Link>
           </div>
           
