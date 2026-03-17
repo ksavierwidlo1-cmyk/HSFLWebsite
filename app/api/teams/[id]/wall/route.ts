@@ -55,14 +55,15 @@ export async function GET(
     // Fetch fresh avatar URLs for all players in posts
     if (posts && posts.length > 0) {
       const postsWithFreshAvatars = await Promise.all(
-        posts.map(async (post) => {
-          if (post.players?.roblox_user_id) {
-            const freshAvatar = await fetchAvatarUrl(post.players.roblox_user_id);
+        posts.map(async (post: any) => {
+          const player = Array.isArray(post.players) ? post.players[0] : post.players;
+          if (player?.roblox_user_id) {
+            const freshAvatar = await fetchAvatarUrl(player.roblox_user_id);
             if (freshAvatar) {
               return {
                 ...post,
                 players: {
-                  ...post.players,
+                  ...player,
                   profile_picture: freshAvatar,
                 },
               };
@@ -146,10 +147,12 @@ export async function POST(
     }
 
     // Fetch fresh avatar URL for the post author
-    if (data.players?.roblox_user_id) {
-      const freshAvatar = await fetchAvatarUrl(data.players.roblox_user_id);
+    const postAuthor = Array.isArray((data as any).players) ? (data as any).players[0] : (data as any).players;
+    if (postAuthor?.roblox_user_id) {
+      const freshAvatar = await fetchAvatarUrl(postAuthor.roblox_user_id);
       if (freshAvatar) {
-        data.players.profile_picture = freshAvatar;
+        postAuthor.profile_picture = freshAvatar;
+        (data as any).players = postAuthor;
       }
     }
 
