@@ -304,8 +304,8 @@ export default function RankingsPage() {
         </div>
 
         {/* Season Filter */}
-        <div className="flex justify-center mb-8">
-          <div className="w-full max-w-md">
+        <div className="mb-8">
+          <div className="max-w-md mx-auto">
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300 text-center">
               Select Season(s)
             </label>

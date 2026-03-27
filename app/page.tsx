@@ -13,7 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   
   // Configure your background video here - use a direct video file path
-  const backgroundVideoUrl = "/videos/hero-background.mp4"; // Replace with your video file path
+  const backgroundVideoUrl = "/videos/videoplayback%20(4).mp4"; // URL-encoded path with space
 
   useEffect(() => {
     fetchData();
@@ -107,7 +107,7 @@ export default function Home() {
               View Schedule
             </Link>
             <Link
-              href="/teams"
+              href="/branding"
               className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-2 border-white rounded-lg font-bold text-lg transition-colors shadow-xl"
             >
               Explore Teams
