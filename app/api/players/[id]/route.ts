@@ -22,7 +22,21 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(player);
+    // Transform snake_case to camelCase for frontend compatibility
+    const transformedPlayer = {
+      ...player,
+      teamId: player.team_id,
+      displayName: player.display_name,
+      robloxUsername: player.roblox_username,
+      robloxUserId: player.roblox_user_id,
+      profilePicture: player.profile_picture,
+      discordUsername: player.discord_username,
+      discordId: player.discord_id,
+      createdAt: player.created_at,
+      updatedAt: player.updated_at,
+    };
+
+    return NextResponse.json(transformedPlayer);
   } catch (error) {
     console.error('Error fetching player:', error);
     return NextResponse.json(
