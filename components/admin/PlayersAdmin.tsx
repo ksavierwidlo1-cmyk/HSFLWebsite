@@ -64,7 +64,8 @@ export default function PlayersAdmin() {
       p.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (p.discordUsername && p.discordUsername.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesTeam = !teamFilter || p.teamId === teamFilter;
+    const matchesTeam = !teamFilter || 
+      (teamFilter === 'FREE_AGENT' ? !p.teamId : p.teamId === teamFilter);
     
     return matchesSearch && matchesTeam;
   });
@@ -295,7 +296,7 @@ export default function PlayersAdmin() {
                 onChange={(e) => setTeamId(e.target.value)}
                 className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
               >
-                <option value="">Select team...</option>
+                <option value="">Free Agent</option>
                 {teams.map((team) => (
                   <option key={team.id} value={team.id}>{team.name}</option>
                 ))}
@@ -445,6 +446,7 @@ export default function PlayersAdmin() {
             className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
           >
             <option value="">All Teams</option>
+            <option value="FREE_AGENT">Free Agents</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>{team.name}</option>
             ))}

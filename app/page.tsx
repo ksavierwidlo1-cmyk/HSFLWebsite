@@ -13,7 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   
   // Configure your background video here - use a direct video file path
-  const backgroundVideoUrl = "/videos/videoplayback%20(4).mp4"; // URL-encoded path with space
+  const backgroundVideoUrl = "/videos/hero-background.mp4";
 
   useEffect(() => {
     fetchData();

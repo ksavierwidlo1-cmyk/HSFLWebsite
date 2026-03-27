@@ -228,7 +228,7 @@ export async function PUT(request: Request) {
     }
 
     const updateData: any = {};
-    if (updates.teamId !== undefined) updateData.team_id = updates.teamId;
+    if (updates.teamId !== undefined) updateData.team_id = updates.teamId || null;
     if (updates.discordUsername !== undefined) updateData.discord_username = updates.discordUsername;
     if (updates.roles !== undefined) updateData.roles = updates.roles;
     
