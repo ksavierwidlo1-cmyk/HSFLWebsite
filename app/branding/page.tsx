@@ -13,7 +13,7 @@ export default function BrandingPage() {
   const [seasons, setSeasons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [conferenceFilter, setConferenceFilter] = useState<ConferenceFilter>('all');
-  const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
+  const [selectedSeasons, setSelectedSeasons] = useState<string[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -31,6 +31,14 @@ export default function BrandingPage() {
       ]);
       setTeams(teamsData);
       setSeasons(seasonsData);
+      
+      // Set current season as default
+      const currentSeason = seasonsData.find((s: any) => s.isCurrent);
+      if (currentSeason) {
+        setSelectedSeasons([currentSeason.name]);
+      } else if (seasonsData.length > 0) {
+        setSelectedSeasons([seasonsData[0].name]);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

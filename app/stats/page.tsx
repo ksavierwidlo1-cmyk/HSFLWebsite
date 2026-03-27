@@ -1,27 +1,18 @@
 'use client';
 
-import { Trophy, TrendingUp } from 'lucide-react';
+import { Trophy, TrendingUp, ChevronUp, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
-type StatCategory = 'points' | 'rebounds' | 'assists' | 'steals' | 'blocks' | 'turnovers' | 'minutesPlayed' | 'efficiency';
+type StatCategory = 'gamesPlayed' | 'points' | 'rebounds' | 'assists' | 'steals' | 'blocks' | 'turnovers' | 'minutesPlayed' | 'efficiency';
 type StatMode = 'averages' | 'totals';
-
-const statCategories = [
-  { key: 'points' as StatCategory, label: 'Points', abbr: 'PTS' },
-  { key: 'rebounds' as StatCategory, label: 'Rebounds', abbr: 'REB' },
-  { key: 'assists' as StatCategory, label: 'Assists', abbr: 'AST' },
-  { key: 'steals' as StatCategory, label: 'Steals', abbr: 'STL' },
-  { key: 'blocks' as StatCategory, label: 'Blocks', abbr: 'BLK' },
-  { key: 'turnovers' as StatCategory, label: 'Turnovers', abbr: 'TOV' },
-  { key: 'minutesPlayed' as StatCategory, label: 'Minutes Played', abbr: 'MIN' },
-  { key: 'efficiency' as StatCategory, label: 'Efficiency', abbr: 'EFF' },
-];
+type SortDirection = 'desc' | 'asc';
 
 export default function StatsPage() {
-  const [selectedStat, setSelectedStat] = useState<StatCategory>('points');
+  const [sortColumn, setSortColumn] = useState<StatCategory>('points');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [statMode, setStatMode] = useState<StatMode>('averages');
   const [selectedSeasons, setSelectedSeasons] = useState<string[]>(['All-Time']);
   const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
@@ -172,13 +163,31 @@ export default function StatsPage() {
 
   const getStatValue = (player: any, stat: StatCategory) => {
     const seasonStats = getPlayerSeasonStats(player);
-    if (statMode === 'totals') {
+    if (stat === 'gamesPlayed') {
+      return seasonStats.gamesPlayed;
+    }
+    if (statMode === 'totals' && stat !== 'efficiency') {
       return seasonStats[stat] * seasonStats.gamesPlayed;
+    }
+    if (stat === 'efficiency') {
+      return statMode === 'totals' ? seasonStats.totalEfficiency : seasonStats.efficiency;
     }
     return seasonStats[stat];
   };
 
-  const getLeaders = (stat: StatCategory) => {
+  const handleSort = (column: StatCategory) => {
+    if (sortColumn === column) {
+      // Toggle direction if same column
+      setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
+    } else {
+      // New column, default to descending
+      setSortColumn(column);
+      setSortDirection('desc');
+    }
+    setCurrentPage(1);
+  };
+
+  const getLeaders = () => {
     return [...players]
       .map(p => ({
         ...p,
@@ -186,22 +195,18 @@ export default function StatsPage() {
       }))
       .filter(p => p.seasonStats.gamesPlayed > 0)
       .sort((a, b) => {
-        const aValue = statMode === 'totals' 
-          ? a.seasonStats[stat] * a.seasonStats.gamesPlayed
-          : a.seasonStats[stat];
-        const bValue = statMode === 'totals'
-          ? b.seasonStats[stat] * b.seasonStats.gamesPlayed
-          : b.seasonStats[stat];
-        return bValue - aValue;
+        const aValue = getStatValue(a, sortColumn);
+        const bValue = getStatValue(b, sortColumn);
+        const comparison = bValue - aValue;
+        return sortDirection === 'desc' ? comparison : -comparison;
       });
   };
 
-  const allLeaders = getLeaders(selectedStat);
+  const allLeaders = getLeaders();
   const totalPages = Math.ceil(allLeaders.length / playersPerPage);
   const startIndex = (currentPage - 1) * playersPerPage;
   const endIndex = startIndex + playersPerPage;
   const leaders = allLeaders.slice(startIndex, endIndex);
-  const selectedCategory = statCategories.find(c => c.key === selectedStat);
 
   if (loading) {
     return (
@@ -263,28 +268,6 @@ export default function StatsPage() {
         </div>
       </div>
 
-      {/* Category Tabs */}
-      <div className="mb-6 overflow-x-auto">
-        <div className="flex space-x-2 min-w-max">
-          {statCategories.map((category) => (
-            <button
-              key={category.key}
-              onClick={() => {
-                setSelectedStat(category.key);
-                setCurrentPage(1);
-              }}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                selectedStat === category.key
-                  ? 'bg-eba-blue text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              {category.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Pagination Info */}
       {allLeaders.length > 0 && (
         <div className="mb-4 flex items-center justify-between">
@@ -330,32 +313,104 @@ export default function StatsPage() {
                 <th className="px-4 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Team
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  GP
+                <th 
+                  onClick={() => handleSort('gamesPlayed')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>GP</span>
+                    {sortColumn === 'gamesPlayed' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'PTS' : 'PPG'}
+                <th 
+                  onClick={() => handleSort('points')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'PTS' : 'PPG'}</span>
+                    {sortColumn === 'points' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'REB' : 'RPG'}
+                <th 
+                  onClick={() => handleSort('rebounds')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'REB' : 'RPG'}</span>
+                    {sortColumn === 'rebounds' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'AST' : 'APG'}
+                <th 
+                  onClick={() => handleSort('assists')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'AST' : 'APG'}</span>
+                    {sortColumn === 'assists' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'STL' : 'SPG'}
+                <th 
+                  onClick={() => handleSort('steals')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'STL' : 'SPG'}</span>
+                    {sortColumn === 'steals' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'BLK' : 'BPG'}
+                <th 
+                  onClick={() => handleSort('blocks')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'BLK' : 'BPG'}</span>
+                    {sortColumn === 'blocks' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'TOV' : 'TPG'}
+                <th 
+                  onClick={() => handleSort('turnovers')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'TOV' : 'TPG'}</span>
+                    {sortColumn === 'turnovers' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  {statMode === 'totals' ? 'MIN' : 'MPG'}
+                <th 
+                  onClick={() => handleSort('minutesPlayed')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>{statMode === 'totals' ? 'MIN' : 'MPG'}</span>
+                    {sortColumn === 'minutesPlayed' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
-                <th className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                  EFF
+                <th 
+                  onClick={() => handleSort('efficiency')}
+                  className="px-4 py-4 text-center text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors select-none"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>EFF</span>
+                    {sortColumn === 'efficiency' && (
+                      sortDirection === 'desc' ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />
+                    )}
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -429,60 +484,62 @@ export default function StatsPage() {
                         );
                       })()}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-center text-gray-900 dark:text-white">
+                    <td className={`px-4 py-4 whitespace-nowrap text-center ${
+                      sortColumn === 'gamesPlayed' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                    }`}>
                       {player.seasonStats.gamesPlayed || 0}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'points' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'points' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.points || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.points || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'rebounds' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'rebounds' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.rebounds || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.rebounds || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'assists' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'assists' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.assists || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.assists || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'steals' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'steals' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.steals || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.steals || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'blocks' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'blocks' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.blocks || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.blocks || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'turnovers' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'turnovers' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.turnovers || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.turnovers || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'minutesPlayed' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'minutesPlayed' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.minutesPlayed || 0) * (player.seasonStats.gamesPlayed || 0)
                         : (player.seasonStats.minutesPlayed || 0)).toFixed(1)}
                     </td>
                     <td className={`px-4 py-4 whitespace-nowrap text-center ${
-                      selectedStat === 'efficiency' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
+                      sortColumn === 'efficiency' ? 'font-bold text-eba-blue' : 'text-gray-900 dark:text-white'
                     }`}>
                       {(statMode === 'totals' 
                         ? (player.seasonStats.totalEfficiency || 0)
@@ -526,27 +583,6 @@ export default function StatsPage() {
             </button>
           </div>
         )}
-      </div>
-
-      {/* Additional Stats Info */}
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {statCategories.map((category) => {
-          const topPlayer = getLeaders(category.key)[0];
-          return (
-            <div
-              key={category.key}
-              className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm"
-            >
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">{category.label} Leader</div>
-              <div className="font-bold text-lg text-eba-blue">
-                {topPlayer ? (topPlayer.seasonStats[category.key] || 0).toFixed(1) : '-'}
-              </div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                {topPlayer ? topPlayer.displayName : 'N/A'}
-              </div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );

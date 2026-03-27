@@ -1,4 +1,3 @@
-import { players } from '@/lib/mockData';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -8,16 +7,29 @@ export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
-  const player = players.find(p => p.id === params.id);
-  
-  if (!player) {
+  try {
+    // Fetch from Supabase database instead of mock data
+    const { data: player, error } = await supabaseAdmin
+      .from('players')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+
+    if (error || !player) {
+      return NextResponse.json(
+        { error: 'Player not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(player);
+  } catch (error) {
+    console.error('Error fetching player:', error);
     return NextResponse.json(
-      { error: 'Player not found' },
-      { status: 404 }
+      { error: 'Failed to fetch player' },
+      { status: 500 }
     );
   }
-
-  return NextResponse.json(player);
 }
 
 // Player self-editing endpoint

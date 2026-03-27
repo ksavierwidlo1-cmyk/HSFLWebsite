@@ -17,11 +17,13 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
   const [availableSeasons, setAvailableSeasons] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [imageError, setImageError] = useState(false);
+  const [playerAccolades, setPlayerAccolades] = useState<any[]>([]);
   const { data: session } = useSession();
 
   useEffect(() => {
     fetchData();
     fetchSeasons();
+    fetchPlayerAccolades();
     setImageError(false); // Reset image error when player changes
   }, [params.id]);
 
@@ -42,6 +44,18 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       }
     } catch (error) {
       console.error('Error fetching seasons:', error);
+    }
+  };
+
+  const fetchPlayerAccolades = async () => {
+    try {
+      const res = await fetch(`/api/player-accolades?playerId=${params.id}`);
+      if (res.ok) {
+        const accolades = await res.json();
+        setPlayerAccolades(accolades);
+      }
+    } catch (error) {
+      console.error('Error fetching player accolades:', error);
     }
   };
 
@@ -355,18 +369,71 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
 
           </div>
         </div>
-
-        {/* Edit Profile Button */}
-        {isOwnProfile && (
-          <div className="mt-6 flex justify-center md:justify-end">
-            <EditProfile
-              player={player}
-              isOwnProfile={isOwnProfile}
-              onSave={handleProfileUpdate}
-            />
-          </div>
-        )}
       </div>
+
+      {/* Edit Profile Section */}
+      {isOwnProfile && (
+        <div className="mb-6">
+          <EditProfile
+            player={player}
+            isOwnProfile={isOwnProfile}
+            onSave={handleProfileUpdate}
+          />
+        </div>
+      )}
+
+      {/* Accolades Section */}
+      {playerAccolades.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+            <Award className="w-6 h-6 text-yellow-500" />
+            Accolades
+          </h2>
+          <div className="space-y-2">
+            {playerAccolades
+              .sort((a, b) => new Date(b.awarded_date).getTime() - new Date(a.awarded_date).getTime())
+              .map((pa) => (
+                <div
+                  key={pa.id}
+                  className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-gray-700 dark:to-gray-750 rounded-lg border border-yellow-200 dark:border-yellow-800 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center shadow-md">
+                      <Award className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-900 dark:text-white">
+                        {pa.accolade?.abbreviation || pa.accolade?.name}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {pa.accolade?.name}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="px-3 py-1 bg-yellow-500 text-white rounded-full font-semibold text-sm shadow-sm">
+                      {pa.season_name}
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* No Accolades Message */}
+      {playerAccolades.length === 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+            <Award className="w-6 h-6 text-gray-400" />
+            Accolades
+          </h2>
+          <div className="text-center py-8">
+            <Award className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+            <p className="text-gray-500 dark:text-gray-400 text-lg">No Accolades</p>
+          </div>
+        </div>
+      )}
 
       {/* Season Selector */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-5 md:p-6 border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6 shadow-sm">

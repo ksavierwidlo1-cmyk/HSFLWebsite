@@ -101,3 +101,21 @@ export interface Article {
   coverImage?: string;
   excerpt?: string;
 }
+
+export interface Accolade {
+  id: string;
+  name: string;
+  abbreviation: string;
+  description?: string;
+  displayOrder: number;
+}
+
+export interface PlayerAccolade {
+  id: string;
+  playerId: string;
+  accoladeId: string;
+  seasonId?: string;
+  seasonName: string;
+  awardedDate: string;
+  accolade?: Accolade;
+}

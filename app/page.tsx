@@ -12,8 +12,8 @@ export default function Home() {
   const [liveStream, setLiveStream] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // Configure your intro video here - can be YouTube, Vimeo, or direct video URL
-  const introVideoUrl = "https://www.youtube.com/embed/npCVD0Pv-3U"; // Replace with your video URL
+  // Configure your background video here - use a direct video file path
+  const backgroundVideoUrl = "/videos/hero-background.mp4"; // Replace with your video file path
 
   useEffect(() => {
     fetchData();
@@ -70,40 +70,56 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Hero Intro Video */}
-      <div className="mb-8">
-        <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-lg p-1 shadow-xl">
-          <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
-            <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-              <iframe
-                src={introVideoUrl}
-                className="absolute top-0 left-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title="EBA Introduction Video"
-              ></iframe>
-            </div>
-            <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-700">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Welcome to the Elite Basketball Association
-              </h2>
-              <p className="text-gray-700 dark:text-gray-300">
-                Experience the most competitive Roblox basketball league. Watch highlights, follow your favorite teams, and witness elite competition.
-              </p>
-            </div>
+    <>
+      {/* Full-Screen Hero Video Background */}
+      <div className="relative min-h-[70vh] mb-8 overflow-hidden rounded-lg">
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          className="absolute top-0 left-0 w-full h-full object-cover"
+          style={{ pointerEvents: 'none' }}
+        >
+          <source src={backgroundVideoUrl} type="video/mp4" />
+          {/* Fallback for browsers that don't support video */}
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Dark Overlay */}
+        <div className="absolute top-0 left-0 w-full h-full bg-black/60" />
+
+        {/* Hero Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center h-full min-h-[70vh] px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
+            Elite Basketball Association
+          </h1>
+          <p className="text-xl sm:text-2xl text-gray-100 mb-8 max-w-3xl drop-shadow-lg">
+            Experience the most competitive Roblox basketball league. Watch highlights, follow your favorite teams, and witness elite competition.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/games"
+              className="px-8 py-4 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-bold text-lg transition-colors shadow-xl"
+            >
+              View Schedule
+            </Link>
+            <Link
+              href="/teams"
+              className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-2 border-white rounded-lg font-bold text-lg transition-colors shadow-xl"
+            >
+              Explore Teams
+            </Link>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content - News and Articles */}
         <div className="lg:col-span-2 space-y-6">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Elite Basketball Association</h1>
-            <p className="text-gray-600 dark:text-gray-400">Your home for the most competitive Roblox basketball experience</p>
-          </div>
-
           {/* Live Stream Section */}
           {liveStream && (
             <div className="bg-gradient-to-r from-red-500 to-purple-600 rounded-lg p-1 shadow-lg">
@@ -321,6 +337,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
