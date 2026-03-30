@@ -32,6 +32,9 @@ export default function PlayersAdmin() {
   const [steals, setSteals] = useState('0');
   const [blocks, setBlocks] = useState('0');
   const [turnovers, setTurnovers] = useState('0');
+  
+  // Search state
+  const [teamSearch, setTeamSearch] = useState('');
 
   // Fetch players and teams on mount
   useEffect(() => {
@@ -69,6 +72,11 @@ export default function PlayersAdmin() {
     
     return matchesSearch && matchesTeam;
   });
+  
+  // Filter teams for dropdown
+  const filteredTeams = teams.filter(team =>
+    team.name?.toLowerCase().includes(teamSearch.toLowerCase())
+  );
 
   const handleImportPlayer = async () => {
     if (!robloxUsername) {
@@ -197,6 +205,7 @@ export default function PlayersAdmin() {
     setSteals('0');
     setBlocks('0');
     setTurnovers('0');
+    setTeamSearch('');
     setShowStats(false);
     setShowImportForm(false);
     setShowEditForm(false);
@@ -291,17 +300,45 @@ export default function PlayersAdmin() {
               <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                 Team
               </label>
+              <input
+                type="text"
+                value={teamSearch}
+                onChange={(e) => setTeamSearch(e.target.value)}
+                placeholder="Search teams..."
+                className="w-full px-4 py-2 mb-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+              />
               <select
                 value={teamId}
                 onChange={(e) => setTeamId(e.target.value)}
                 className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
               >
                 <option value="">Free Agent</option>
-                {teams.map((team) => (
+                {filteredTeams.map((team) => (
                   <option key={team.id} value={team.id}>{team.name}</option>
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Staff Role Checkbox */}
+          <div className="mt-6">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={roles.includes('Staff')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setRoles([...roles, 'Staff']);
+                  } else {
+                    setRoles(roles.filter(r => r !== 'Staff'));
+                  }
+                }}
+                className="w-5 h-5 text-eba-blue bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-eba-blue focus:ring-2"
+              />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Assign Staff Role (displays hammer icon on comments and posts)
+              </span>
+            </label>
           </div>
 
           {/* Stats Section */}

@@ -25,6 +25,11 @@ export default function AccoladesAdmin() {
   const [selectedAccolade, setSelectedAccolade] = useState('');
   const [selectedSeason, setSelectedSeason] = useState('');
   const [selectedSeasonName, setSelectedSeasonName] = useState('');
+  
+  // Search state
+  const [playerSearch, setPlayerSearch] = useState('');
+  const [accoladeSearch, setAccoladeSearch] = useState('');
+  const [seasonSearch, setSeasonSearch] = useState('');
 
   useEffect(() => {
     fetchAccolades();
@@ -243,8 +248,26 @@ export default function AccoladesAdmin() {
     setSelectedAccolade('');
     setSelectedSeason('');
     setSelectedSeasonName('');
+    setPlayerSearch('');
+    setAccoladeSearch('');
+    setSeasonSearch('');
     setShowAssignmentForm(false);
   };
+
+  // Filter functions
+  const filteredPlayers = players.filter(player => 
+    player.displayName?.toLowerCase().includes(playerSearch.toLowerCase()) ||
+    player.robloxUsername?.toLowerCase().includes(playerSearch.toLowerCase())
+  );
+
+  const filteredAccolades = accolades.filter(accolade =>
+    accolade.name?.toLowerCase().includes(accoladeSearch.toLowerCase()) ||
+    accolade.abbreviation?.toLowerCase().includes(accoladeSearch.toLowerCase())
+  );
+
+  const filteredSeasons = seasons.filter(season =>
+    season.name?.toLowerCase().includes(seasonSearch.toLowerCase())
+  );
 
   const openEditAccoladeForm = (accolade: any) => {
     setEditingAccolade(accolade);
@@ -462,13 +485,20 @@ export default function AccoladesAdmin() {
                   <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                     Player *
                   </label>
+                  <input
+                    type="text"
+                    value={playerSearch}
+                    onChange={(e) => setPlayerSearch(e.target.value)}
+                    placeholder="Search players..."
+                    className="w-full px-3 py-2 mb-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                  />
                   <select
                     value={selectedPlayer}
                     onChange={(e) => setSelectedPlayer(e.target.value)}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
                   >
                     <option value="">Select Player</option>
-                    {players.map((player) => (
+                    {filteredPlayers.map((player) => (
                       <option key={player.id} value={player.id}>
                         {player.displayName} (@{player.robloxUsername})
                       </option>
@@ -479,13 +509,20 @@ export default function AccoladesAdmin() {
                   <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                     Accolade *
                   </label>
+                  <input
+                    type="text"
+                    value={accoladeSearch}
+                    onChange={(e) => setAccoladeSearch(e.target.value)}
+                    placeholder="Search accolades..."
+                    className="w-full px-3 py-2 mb-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                  />
                   <select
                     value={selectedAccolade}
                     onChange={(e) => setSelectedAccolade(e.target.value)}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
                   >
                     <option value="">Select Accolade</option>
-                    {accolades.map((accolade) => (
+                    {filteredAccolades.map((accolade) => (
                       <option key={accolade.id} value={accolade.id}>
                         {accolade.name} ({accolade.abbreviation})
                       </option>
@@ -496,6 +533,13 @@ export default function AccoladesAdmin() {
                   <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
                     Season *
                   </label>
+                  <input
+                    type="text"
+                    value={seasonSearch}
+                    onChange={(e) => setSeasonSearch(e.target.value)}
+                    placeholder="Search seasons..."
+                    className="w-full px-3 py-2 mb-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                  />
                   <select
                     value={selectedSeason}
                     onChange={(e) => {
@@ -506,7 +550,7 @@ export default function AccoladesAdmin() {
                     className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
                   >
                     <option value="">Select Season</option>
-                    {seasons.map((season) => (
+                    {filteredSeasons.map((season) => (
                       <option key={season.id} value={season.id}>
                         {season.name}
                       </option>

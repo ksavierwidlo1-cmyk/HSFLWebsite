@@ -20,7 +20,8 @@ export async function GET(
           id,
           display_name,
           roblox_username,
-          profile_picture
+          profile_picture,
+          roles
         )
       `)
       .eq('article_id', params.id)

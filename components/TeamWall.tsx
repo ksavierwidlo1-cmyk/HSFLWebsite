@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { MessageSquare, Pin, Trash2, Crown } from "lucide-react";
+import { MessageSquare, Pin, Trash2, Crown, Hammer } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface TeamWallProps {
@@ -207,6 +207,9 @@ export default function TeamWall({ teamId }: TeamWallProps) {
                       </span>
                       {post.players?.roles?.includes("Franchise Owner") && (
                         <Crown className="w-4 h-4 text-yellow-500" />
+                      )}
+                      {post.players?.roles?.includes("Staff") && (
+                        <Hammer className="w-4 h-4 text-eba-blue" />
                       )}
                       {post.is_pinned && (
                         <Pin className="w-4 h-4 text-eba-blue" />

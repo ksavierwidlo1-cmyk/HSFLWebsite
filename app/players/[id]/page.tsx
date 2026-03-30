@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Shield, Award, Users as UsersIcon } from 'lucide-react';
+import { User, Shield, Award, Users as UsersIcon, Hammer } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -131,6 +131,8 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       case 'Head Coach':
       case 'Assistant Coach':
         return <UsersIcon className="w-4 h-4 text-eba-blue" />;
+      case 'Staff':
+        return <Hammer className="w-4 h-4 text-eba-blue" />;
       default:
         return <User className="w-4 h-4 text-gray-500" />;
     }

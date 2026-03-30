@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Heart, MessageCircle, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, Trash2, Hammer } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface ArticleSocialProps {
@@ -270,10 +270,15 @@ export default function ArticleSocial({ articleId }: ArticleSocialProps) {
             <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {comment.players?.display_name}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-900 dark:text-white">
+                      {comment.players?.display_name}
+                    </span>
+                    {comment.players?.roles?.includes('Staff') && (
+                      <Hammer className="w-4 h-4 text-eba-blue" />
+                    )}
+                  </div>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     @{comment.players?.roblox_username}
                   </span>
                   <span className="text-sm text-gray-400 dark:text-gray-500 ml-2">
