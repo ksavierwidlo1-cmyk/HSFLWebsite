@@ -4,6 +4,9 @@ import { Calendar, ChevronRight, Radio, ExternalLink, TrendingUp, User } from 'l
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+// Note: Metadata export doesn't work in 'use client' components
+// The metadata is already set in layout.tsx which covers this page
+
 export default function Home() {
   const [articles, setArticles] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
