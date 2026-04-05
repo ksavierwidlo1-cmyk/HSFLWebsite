@@ -16,28 +16,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Convert snake_case to camelCase
-    const formattedStats = gameStats?.map(stat => ({
-      id: stat.id,
-      playerId: stat.player_id,
-      gameId: stat.game_id,
-      date: stat.date,
-      opponent: stat.opponent,
-      points: stat.points,
-      rebounds: stat.rebounds,
-      assists: stat.assists,
-      steals: stat.steals,
-      blocks: stat.blocks,
-      turnovers: stat.turnovers,
-      fieldGoalsMade: stat.field_goals_made,
-      fieldGoalsAttempted: stat.field_goals_attempted,
-      threePointersMade: stat.three_pointers_made,
-      threePointersAttempted: stat.three_pointers_attempted,
-      freeThrowsMade: stat.free_throws_made,
-      freeThrowsAttempted: stat.free_throws_attempted,
-      fouls: stat.fouls,
-      result: stat.result,
-    })) || [];
+    // Convert snake_case to camelCase (football fields)
+    const formattedStats = gameStats?.map(mapStatRow) || [];
 
     return NextResponse.json(formattedStats);
   } catch (error) {
@@ -56,27 +36,7 @@ export async function POST(request: NextRequest) {
     // Insert the game stats
     const { data: newGameStats, error: insertError } = await supabaseAdmin
       .from('game_stats')
-      .insert({
-        player_id: gameStats.playerId,
-        game_id: gameStats.gameId,
-        date: gameStats.date,
-        opponent: gameStats.opponent,
-        points: gameStats.points,
-        rebounds: gameStats.rebounds,
-        assists: gameStats.assists,
-        steals: gameStats.steals,
-        blocks: gameStats.blocks,
-        turnovers: gameStats.turnovers,
-        field_goals_made: gameStats.fieldGoalsMade,
-        field_goals_attempted: gameStats.fieldGoalsAttempted,
-        three_pointers_made: gameStats.threePointersMade,
-        three_pointers_attempted: gameStats.threePointersAttempted,
-        free_throws_made: gameStats.freeThrowsMade,
-        free_throws_attempted: gameStats.freeThrowsAttempted,
-        fouls: gameStats.fouls,
-        minutes_played: gameStats.minutesPlayed || 0,
-        result: gameStats.result,
-      })
+      .insert(buildStatRow(gameStats))
       .select()
       .single();
 
@@ -156,6 +116,116 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Map a DB row to camelCase football stat object
+function mapStatRow(stat: any) {
+  return {
+    id: stat.id,
+    playerId: stat.player_id,
+    gameId: stat.game_id,
+    date: stat.date,
+    opponent: stat.opponent,
+    result: stat.result,
+    // Football passing
+    completions: stat.completions || 0,
+    passAttempts: stat.pass_attempts || 0,
+    passingYards: stat.passing_yards || 0,
+    passingTDs: stat.passing_tds || 0,
+    interceptions: stat.interceptions || 0,
+    passeFumbles: stat.passe_fumbles || 0,
+    sacksTaken: stat.sacks_taken || 0,
+    // Football rushing
+    rushAttempts: stat.rush_attempts || 0,
+    rushingYards: stat.rushing_yards || 0,
+    rushingTDs: stat.rushing_tds || 0,
+    rushFumbles: stat.rush_fumbles || 0,
+    // Football receiving
+    receptions: stat.receptions || 0,
+    targets: stat.targets || 0,
+    receivingYards: stat.receiving_yards || 0,
+    receivingTDs: stat.receiving_tds || 0,
+    recFumbles: stat.rec_fumbles || 0,
+    // Blocking
+    snaps: stat.snaps || 0,
+    sacksAllowed: stat.sacks_allowed || 0,
+    // Defense
+    tackles: stat.tackles || 0,
+    tacklesForLoss: stat.tackles_for_loss || 0,
+    defensiveSacks: stat.defensive_sacks || 0,
+    hurries: stat.hurries || 0,
+    safeties: stat.safeties || 0,
+    defInterceptions: stat.def_interceptions || 0,
+    passBreakups: stat.pass_breakups || 0,
+    receptionsAllowed: stat.receptions_allowed || 0,
+    targetsDefended: stat.targets_defended || 0,
+    yardsAllowed: stat.yards_allowed || 0,
+    touchdownsAllowed: stat.touchdowns_allowed || 0,
+    defensiveTDs: stat.defensive_tds || 0,
+    forcedFumbles: stat.forced_fumbles || 0,
+    fumbleRecoveries: stat.fumble_recoveries || 0,
+    // Kicking
+    fieldGoalsMade: stat.field_goals_made || 0,
+    fieldGoalsAttempted: stat.field_goals_attempted || 0,
+    extraPointsMade: stat.extra_points_made || 0,
+    extraPointsAttempted: stat.extra_points_attempted || 0,
+    // Returning
+    returns: stat.returns || 0,
+    returnYards: stat.return_yards || 0,
+    returnTDs: stat.return_tds || 0,
+    returnFumbles: stat.return_fumbles || 0,
+  };
+}
+
+// Build a DB row from camelCase football stat object
+function buildStatRow(gs: any) {
+  return {
+    player_id: gs.playerId,
+    game_id: gs.gameId,
+    date: gs.date,
+    opponent: gs.opponent,
+    result: gs.result,
+    completions: gs.completions || 0,
+    pass_attempts: gs.passAttempts || 0,
+    passing_yards: gs.passingYards || 0,
+    passing_tds: gs.passingTDs || 0,
+    interceptions: gs.interceptions || 0,
+    passe_fumbles: gs.passeFumbles || 0,
+    sacks_taken: gs.sacksTaken || 0,
+    rush_attempts: gs.rushAttempts || 0,
+    rushing_yards: gs.rushingYards || 0,
+    rushing_tds: gs.rushingTDs || 0,
+    rush_fumbles: gs.rushFumbles || 0,
+    receptions: gs.receptions || 0,
+    targets: gs.targets || 0,
+    receiving_yards: gs.receivingYards || 0,
+    receiving_tds: gs.receivingTDs || 0,
+    rec_fumbles: gs.recFumbles || 0,
+    snaps: gs.snaps || 0,
+    sacks_allowed: gs.sacksAllowed || 0,
+    tackles: gs.tackles || 0,
+    tackles_for_loss: gs.tacklesForLoss || 0,
+    defensive_sacks: gs.defensiveSacks || 0,
+    hurries: gs.hurries || 0,
+    safeties: gs.safeties || 0,
+    def_interceptions: gs.defInterceptions || 0,
+    pass_breakups: gs.passBreakups || 0,
+    receptions_allowed: gs.receptionsAllowed || 0,
+    targets_defended: gs.targetsDefended || 0,
+    yards_allowed: gs.yardsAllowed || 0,
+    touchdowns_allowed: gs.touchdownsAllowed || 0,
+    defensive_tds: gs.defensiveTDs || 0,
+    forced_fumbles: gs.forcedFumbles || 0,
+    fumble_recoveries: gs.fumbleRecoveries || 0,
+    field_goals_made: gs.fieldGoalsMade || 0,
+    field_goals_attempted: gs.fieldGoalsAttempted || 0,
+    extra_points_made: gs.extraPointsMade || 0,
+    extra_points_attempted: gs.extraPointsAttempted || 0,
+    returns: gs.returns || 0,
+    return_yards: gs.returnYards || 0,
+    return_tds: gs.returnTDs || 0,
+    return_fumbles: gs.returnFumbles || 0,
+  };
 }
 
 function calculatePercentage(made: number, attempted: number): number {
@@ -256,27 +326,7 @@ export async function PUT(request: NextRequest) {
 
     const { error: updateError } = await supabaseAdmin
       .from('game_stats')
-      .update({
-        player_id: gameStats.playerId,
-        game_id: gameStats.gameId,
-        date: gameStats.date,
-        opponent: gameStats.opponent,
-        points: gameStats.points,
-        rebounds: gameStats.rebounds,
-        assists: gameStats.assists,
-        steals: gameStats.steals,
-        blocks: gameStats.blocks,
-        turnovers: gameStats.turnovers,
-        field_goals_made: gameStats.fieldGoalsMade,
-        field_goals_attempted: gameStats.fieldGoalsAttempted,
-        three_pointers_made: gameStats.threePointersMade,
-        three_pointers_attempted: gameStats.threePointersAttempted,
-        free_throws_made: gameStats.freeThrowsMade,
-        free_throws_attempted: gameStats.freeThrowsAttempted,
-        fouls: gameStats.fouls,
-        minutes_played: gameStats.minutesPlayed || 0,
-        result: gameStats.result,
-      })
+      .update(buildStatRow(gameStats))
       .eq('id', gameStats.id);
 
     if (updateError) {

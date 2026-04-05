@@ -10,10 +10,11 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // EBA Brand Colors (from logo)
-        'eba-blue': '#00A8E8',
+        'eba-blue': '#1872de',
         'eba-dark': '#0A0E27',
         'eba-light': '#F5F5F5',
+        'hsfl-blue': '#1872de',
+        'hsfl-blue-dark': '#1460bf',
         background: "var(--background)",
         foreground: "var(--foreground)",
       },

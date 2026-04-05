@@ -112,7 +112,7 @@ export default function GamesPage() {
           }))}
           selectedSeasons={selectedSeasons}
           onChange={setSelectedSeasons}
-          accentColor="#00A8E8"
+          accentColor="#1872de"
         />
       </div>
 

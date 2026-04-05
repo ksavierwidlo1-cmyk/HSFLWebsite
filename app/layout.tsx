@@ -6,58 +6,35 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: {
-    default: "Elite Basketball Association (EBA) - Practical Basketball League",
-    template: "%s | Elite Basketball Association"
+    default: "High School Football League (HSFL)",
+    template: "%s | High School Football League"
   },
-  description: "Official website of the Elite Basketball Association (EBA) - The premier Practical Basketball league on Roblox. Join the most competitive basketball community with live games, player stats, teams, and rankings.",
+  description: "Official website of the High School Football League (HSFL). Follow teams, track player stats, view standings, and stay up to date with every game.",
   keywords: [
-    "Elite Basketball Association",
-    "EBA",
-    "Practical Basketball",
-    "Roblox Basketball",
-    "Basketball League",
-    "EBA League",
-    "Basketball Association",
-    "Roblox Basketball League",
-    "Practical Basketball League",
-    "Competitive Basketball",
-    "Basketball Stats",
-    "Basketball Teams",
-    "Basketball Players",
-    "Live Basketball Games"
+    "High School Football League",
+    "HSFL",
+    "High School Football",
+    "Football League",
+    "Football Stats",
+    "Football Teams",
+    "Football Players",
+    "Football Rankings",
+    "Football Standings"
   ],
-  authors: [{ name: "Elite Basketball Association" }],
-  creator: "Elite Basketball Association",
-  publisher: "Elite Basketball Association",
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
-  metadataBase: new URL('https://ebassociation.com'),
-  alternates: {
-    canonical: 'https://ebassociation.com',
-  },
+  authors: [{ name: "High School Football League" }],
+  creator: "High School Football League",
+  publisher: "High School Football League",
   openGraph: {
-    title: "Elite Basketball Association (EBA) - Practical Basketball League",
-    description: "Official website of the Elite Basketball Association (EBA) - The premier Practical Basketball league on Roblox. Join the most competitive basketball community.",
-    url: 'https://ebassociation.com',
-    siteName: 'Elite Basketball Association',
-    images: [
-      {
-        url: '/logo.png',
-        width: 512,
-        height: 512,
-        alt: 'EBA - Elite Basketball Association Logo',
-      },
-    ],
+    title: "High School Football League (HSFL)",
+    description: "Official website of the High School Football League. Follow teams, track player stats, and stay up to date with every game.",
+    siteName: 'High School Football League',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Elite Basketball Association (EBA) - Practical Basketball",
-    description: "Official website of the Elite Basketball Association - Premier Practical Basketball league on Roblox",
-    images: ['/logo.png'],
+    title: "High School Football League (HSFL)",
+    description: "Official website of the High School Football League",
   },
   robots: {
     index: true,
@@ -85,12 +62,10 @@ export default function RootLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SportsOrganization',
-    name: 'Elite Basketball Association',
-    alternateName: 'EBA',
-    url: 'https://ebassociation.com',
-    logo: 'https://ebassociation.com/logo.png',
-    description: 'The premier Practical Basketball league on Roblox featuring competitive gameplay, player stats, teams, and live games.',
-    sport: 'Basketball',
+    name: 'High School Football League',
+    alternateName: 'HSFL',
+    description: 'The premier high school football league featuring competitive gameplay, player stats, teams, and live games.',
+    sport: 'Football',
     sameAs: [
       // Add your social media links here when available
       // 'https://twitter.com/EBA',

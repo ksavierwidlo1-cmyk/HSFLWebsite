@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Trophy, TrendingUp, TrendingDown } from 'lucide-react';
 import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
-type ViewMode = 'overall' | 'eastern' | 'western';
+type ViewMode = 'overall' | '7a' | '6a' | '5a';
 type RecordType = 'overall' | 'conference';
 
 interface TeamStanding {
@@ -173,10 +173,12 @@ export default function StandingsPage() {
     standings = calculateStandings(undefined, selectedSeasons, recordType);
     
     // Filter teams by conference for display only
-    if (viewMode === 'eastern') {
-      standings = standings.filter(s => s.team.conference === 'Eastern');
-    } else if (viewMode === 'western') {
-      standings = standings.filter(s => s.team.conference === 'Western');
+    if (viewMode === '7a') {
+      standings = standings.filter(s => s.team.conference === '7A');
+    } else if (viewMode === '6a') {
+      standings = standings.filter(s => s.team.conference === '6A');
+    } else if (viewMode === '5a') {
+      standings = standings.filter(s => s.team.conference === '5A');
     }
 
     // Sort by wins (descending), then by losses (ascending), then by point differential (descending)
@@ -230,7 +232,7 @@ export default function StandingsPage() {
               }))}
               selectedSeasons={selectedSeasons}
               onChange={setSelectedSeasons}
-              accentColor="#00A8E8"
+              accentColor="#1872de"
             />
           </div>
 
@@ -264,24 +266,34 @@ export default function StandingsPage() {
               Overall
             </button>
             <button
-              onClick={() => setViewMode('eastern')}
+              onClick={() => setViewMode('7a')}
               className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                viewMode === 'eastern'
+                viewMode === '7a'
                   ? 'bg-eba-blue text-white'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              Eastern
+              7A Division
             </button>
             <button
-              onClick={() => setViewMode('western')}
+              onClick={() => setViewMode('6a')}
               className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                viewMode === 'western'
+                viewMode === '6a'
                   ? 'bg-eba-blue text-white'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
-              Western
+              6A Division
+            </button>
+            <button
+              onClick={() => setViewMode('5a')}
+              className={`px-6 py-2 rounded-md font-medium transition-colors ${
+                viewMode === '5a'
+                  ? 'bg-eba-blue text-white'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              5A Division
             </button>
           </div>
         </div>
@@ -363,7 +375,7 @@ export default function StandingsPage() {
                             {standing.team.name}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {standing.team.conference} Conference
+                            {standing.team.conference} Division
                           </div>
                         </div>
                       </Link>

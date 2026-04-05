@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import MultiSeasonSelector from '@/components/MultiSeasonSelector';
 
-type ConferenceFilter = 'all' | 'Eastern' | 'Western';
+type ConferenceFilter = 'all' | '7A' | '6A' | '5A';
 
 export default function BrandingPage() {
   const [teams, setTeams] = useState<any[]>([]);
@@ -97,24 +97,34 @@ export default function BrandingPage() {
             All Teams
           </button>
           <button
-            onClick={() => setConferenceFilter('Eastern')}
+            onClick={() => setConferenceFilter('7A')}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              conferenceFilter === 'Eastern'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 border border-blue-300 dark:border-gray-600'
+              conferenceFilter === '7A'
+                ? 'bg-hsfl-blue text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
             }`}
           >
-            Eastern Conference
+            7A Division
           </button>
           <button
-            onClick={() => setConferenceFilter('Western')}
+            onClick={() => setConferenceFilter('6A')}
             className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-              conferenceFilter === 'Western'
-                ? 'bg-red-600 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-gray-700 border border-red-300 dark:border-gray-600'
+              conferenceFilter === '6A'
+                ? 'bg-hsfl-blue text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
             }`}
           >
-            Western Conference
+            6A Division
+          </button>
+          <button
+            onClick={() => setConferenceFilter('5A')}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              conferenceFilter === '5A'
+                ? 'bg-hsfl-blue text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+            }`}
+          >
+            5A Division
           </button>
         </div>
 
@@ -127,7 +137,7 @@ export default function BrandingPage() {
             availableSeasons={seasons.map(s => ({ id: s.id, name: s.name, isCurrent: s.isCurrent }))}
             selectedSeasons={selectedSeasons}
             onChange={setSelectedSeasons}
-            accentColor="#00A8E8"
+            accentColor="#1872de"
           />
         </div>
       </div>
@@ -164,10 +174,8 @@ export default function BrandingPage() {
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{team.name}</h2>
                 <div className="flex items-center space-x-2 mt-1">
                   {/* Conference Badge */}
-                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full text-white ${
-                    team.conference === 'Western' ? 'bg-red-600' : 'bg-blue-600'
-                  }`}>
-                    {team.conference} Conference
+                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full text-white bg-hsfl-blue">
+                    {team.conference} Division
                   </span>
                   {/* Team Colors */}
                   <div className="flex items-center space-x-1">

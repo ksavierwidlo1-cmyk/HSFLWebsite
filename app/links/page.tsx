@@ -2,32 +2,32 @@ import { ExternalLink, Users, Gamepad2, MessageCircle, Globe } from 'lucide-reac
 
 const links = [
   {
-    title: 'Roblox Group',
-    description: 'EBA Roblox Group',
-    url: 'https://www.roblox.com/communities/16862596/Elite-Basketball-Association#!/about',
+    title: 'HSFL Roblox Group',
+    description: 'Join our Roblox community',
+    url: 'https://www.roblox.com/communities/979552922/HSFL-High-School-Football-League#!/about',
     icon: Users,
-    color: 'bg-eba-blue hover:bg-blue-600',
+    color: 'bg-hsfl-blue hover:bg-hsfl-blue-dark',
   },
   {
-    title: 'Roblox Game',
-    description: 'Practical Basketball',
-    url: 'https://www.roblox.com/games/80681221431821/Practical-Basketball',
+    title: 'Road To Glory',
+    description: 'Play HSFL on Roblox',
+    url: 'https://www.roblox.com/games/86548405529790/HSFL-Road-to-Glory',
     icon: Gamepad2,
-    color: 'bg-eba-blue hover:bg-blue-600',
+    color: 'bg-hsfl-blue hover:bg-hsfl-blue-dark',
   },
   {
     title: 'Discord Server',
     description: 'Join our Discord community',
-    url: 'https://discord.gg/eba',
+    url: 'https://discord.gg/ZwjJcuVyQd',
     icon: MessageCircle,
-    color: 'bg-eba-blue hover:bg-blue-600',
+    color: 'bg-hsfl-blue hover:bg-hsfl-blue-dark',
   },
   {
     title: 'Website',
     description: 'You are here!',
-    url: typeof window !== 'undefined' ? window.location.origin : 'https://www.ebassociation.com',
+    url: 'https://robloxfootballleague.com',
     icon: Globe,
-    color: 'bg-eba-blue hover:bg-blue-600',
+    color: 'bg-hsfl-blue hover:bg-hsfl-blue-dark',
   },
 ];
 
@@ -35,8 +35,8 @@ export default function LinksPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Important Links</h1>
-        <p className="text-gray-600 dark:text-gray-400">Connect with the Elite Basketball Association across platforms</p>
+        <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">Resources</h1>
+        <p className="text-gray-600 dark:text-gray-400">Connect with the High School Football League across platforms</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -67,7 +67,7 @@ export default function LinksPage() {
       <div className="mt-8 bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
         <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Stay Connected</h3>
         <p className="text-gray-600 dark:text-gray-400">
-          Follow us on all platforms to stay updated with the latest news, scores, and events from the Elite Basketball Association!
+          Follow us on all platforms to stay updated with the latest news, scores, and events from the High School Football League!
         </p>
       </div>
     </div>

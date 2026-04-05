@@ -20,7 +20,7 @@ export default function TeamsAdmin() {
   const [secondaryColor, setSecondaryColor] = useState('#0A0E27');
   const [owner, setOwner] = useState('');
   const [headCoach, setHeadCoach] = useState('');
-  const [conference, setConference] = useState<'Eastern' | 'Western'>('Eastern');
+  const [conference, setConference] = useState<'7A' | '6A' | '5A'>('7A');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [selectedSeasonIds, setSelectedSeasonIds] = useState<string[]>([]);
@@ -154,7 +154,7 @@ export default function TeamsAdmin() {
     setSecondaryColor('#0A0E27');
     setOwner('');
     setHeadCoach('');
-    setConference('Eastern');
+    setConference('7A');
     setLogoFile(null);
     setLogoPreview('');
     setSelectedSeasonIds(seasons.map(s => s.id)); // Default to all seasons
@@ -170,7 +170,7 @@ export default function TeamsAdmin() {
     setSecondaryColor(team.secondaryColor || team.colors?.secondary || '#0A0E27');
     setOwner(team.owner);
     setHeadCoach(team.headCoach);
-    setConference(team.conference || 'Eastern');
+    setConference(team.conference || '7A');
     setLogoPreview(team.logo || '');
     setSelectedSeasonIds(team.seasons?.map((s: any) => s.id) || []);
     setShowForm(true);
@@ -346,11 +346,12 @@ export default function TeamsAdmin() {
               </label>
               <select
                 value={conference}
-                onChange={(e) => setConference(e.target.value as 'Eastern' | 'Western')}
+                onChange={(e) => setConference(e.target.value as '7A' | '6A' | '5A')}
                 className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
               >
-                <option value="Eastern">Eastern Conference</option>
-                <option value="Western">Western Conference</option>
+                <option value="7A">7A Division</option>
+                <option value="6A">6A Division</option>
+                <option value="5A">5A Division</option>
               </select>
             </div>
 

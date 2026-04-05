@@ -22,7 +22,7 @@ export default function MultiSeasonSelector({
   availableSeasons, 
   selectedSeasons,
   onChange,
-  accentColor = '#00A8E8',
+  accentColor = '#1872de',
   className = '',
   useIds = false
 }: MultiSeasonSelectorProps) {

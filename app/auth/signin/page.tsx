@@ -42,7 +42,7 @@ export default function SignInPage() {
             <p className="mb-2">First time signing in?</p>
             <p className="text-xs">
               If your Roblox username is already registered, you'll be logged into your existing profile.
-              Otherwise, a new Free Agent profile will be created for you.
+              Otherwise, a new Eligible Athlete profile will be created for you.
             </p>
           </div>
         </div>

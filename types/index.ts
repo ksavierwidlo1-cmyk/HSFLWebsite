@@ -1,4 +1,22 @@
-// Type definitions for the EBA Basketball League website
+// Type definitions for the HSFL Football League website
+
+export const POSITIONS = [
+  { abbr: 'C',  name: 'Center' },
+  { abbr: 'OG', name: 'Offensive Guard' },
+  { abbr: 'OT', name: 'Offensive Tackle' },
+  { abbr: 'QB', name: 'Quarterback' },
+  { abbr: 'RB', name: 'Running Back' },
+  { abbr: 'WR', name: 'Wide Receiver' },
+  { abbr: 'TE', name: 'Tight End' },
+  { abbr: 'K',  name: 'Kicker' },
+  { abbr: 'CB', name: 'Cornerback' },
+  { abbr: 'LB', name: 'Linebacker' },
+  { abbr: 'DT', name: 'Defensive Tackle' },
+  { abbr: 'DE', name: 'Defensive End' },
+  { abbr: 'S',  name: 'Safety' },
+] as const;
+
+export type PositionAbbr = typeof POSITIONS[number]['abbr'];
 
 export interface GameStats {
   id: string;
@@ -6,20 +24,54 @@ export interface GameStats {
   gameId: string;
   date: string;
   opponent: string;
-  points: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-  fieldGoalsMade: number;
-  fieldGoalsAttempted: number;
-  threePointersMade: number;
-  threePointersAttempted: number;
-  freeThrowsMade: number;
-  freeThrowsAttempted: number;
-  fouls: number;
   result: 'W' | 'L';
+  // Passing
+  completions?: number;
+  passAttempts?: number;
+  passingYards?: number;
+  passingTDs?: number;
+  interceptions?: number;
+  passeFumbles?: number;
+  sacksTaken?: number;
+  // Rushing
+  rushAttempts?: number;
+  rushingYards?: number;
+  rushingTDs?: number;
+  rushFumbles?: number;
+  // Receiving
+  receptions?: number;
+  targets?: number;
+  receivingYards?: number;
+  receivingTDs?: number;
+  recFumbles?: number;
+  // Blocking
+  snaps?: number;
+  sacksAllowed?: number;
+  // Defense
+  tackles?: number;
+  tacklesForLoss?: number;
+  defensiveSacks?: number;
+  hurries?: number;
+  safeties?: number;
+  defInterceptions?: number;
+  passBreakups?: number;
+  receptionsAllowed?: number;
+  targetsDefended?: number;
+  yardsAllowed?: number;
+  touchdownsAllowed?: number;
+  defensiveTDs?: number;
+  forcedFumbles?: number;
+  fumbleRecoveries?: number;
+  // Kicking
+  fieldGoalsMade?: number;
+  fieldGoalsAttempted?: number;
+  extraPointsMade?: number;
+  extraPointsAttempted?: number;
+  // Returning
+  returns?: number;
+  returnYards?: number;
+  returnTDs?: number;
+  returnFumbles?: number;
 }
 
 export interface Player {
@@ -31,6 +83,8 @@ export interface Player {
   description?: string;
   discordUsername?: string;
   teamId?: string;
+  jerseyNumber?: number;
+  positions?: PositionAbbr[];
   roles: PlayerRole[];
   stats: PlayerStats;
   gameStats?: GameStats[];
@@ -38,25 +92,10 @@ export interface Player {
 
 export interface PlayerStats {
   gamesPlayed: number;
-  points: number;
-  rebounds: number;
-  assists: number;
-  steals: number;
-  blocks: number;
-  turnovers: number;
-  fieldGoalsMade: number;
-  fieldGoalsAttempted: number;
-  fieldGoalPercentage: number;
-  threePointersMade: number;
-  threePointersAttempted: number;
-  threePointPercentage: number;
-  freeThrowsMade: number;
-  freeThrowsAttempted: number;
-  freeThrowPercentage: number;
-  fouls: number;
-  assistTurnoverRatio: number;
-  assistPercentage: number;
-  efficiency: number;
+  // Legacy aggregate fields (populated by admin or computed)
+  passingYards?: number;
+  rushingYards?: number;
+  receivingYards?: number;
 }
 
 export type PlayerRole = 
@@ -74,7 +113,7 @@ export interface Team {
   generalManager?: string;
   headCoach?: string;
   assistantCoaches: string[];
-  conference: 'Eastern' | 'Western';
+  conference: '7A' | '6A' | '5A';
   colors: {
     primary: string;
     secondary: string;

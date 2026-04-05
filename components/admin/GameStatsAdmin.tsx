@@ -20,21 +20,24 @@ export default function GameStatsAdmin() {
     gameId: '',
     date: '',
     opponent: '',
-    points: '',
-    rebounds: '',
-    assists: '',
-    steals: '',
-    blocks: '',
-    turnovers: '',
-    fieldGoalsMade: '',
-    fieldGoalsAttempted: '',
-    threePointersMade: '',
-    threePointersAttempted: '',
-    freeThrowsMade: '',
-    freeThrowsAttempted: '',
-    fouls: '',
-    minutesPlayed: '',
     result: 'W' as 'W' | 'L',
+    // Passing
+    completions: '', passAttempts: '', passingYards: '', passingTDs: '',
+    interceptions: '', passeFumbles: '', sacksTaken: '',
+    // Rushing
+    rushAttempts: '', rushingYards: '', rushingTDs: '', rushFumbles: '',
+    // Receiving
+    receptions: '', targets: '', receivingYards: '', receivingTDs: '', recFumbles: '',
+    // Blocking
+    snaps: '', sacksAllowed: '',
+    // Defense
+    tackles: '', tacklesForLoss: '', defensiveSacks: '', hurries: '', safeties: '',
+    defInterceptions: '', passBreakups: '', receptionsAllowed: '', targetsDefended: '',
+    yardsAllowed: '', touchdownsAllowed: '', defensiveTDs: '', forcedFumbles: '', fumbleRecoveries: '',
+    // Kicking
+    fieldGoalsMade: '', fieldGoalsAttempted: '', extraPointsMade: '', extraPointsAttempted: '',
+    // Returning
+    returns: '', returnYards: '', returnTDs: '', returnFumbles: '',
   });
 
   useEffect(() => {
@@ -79,23 +82,19 @@ export default function GameStatsAdmin() {
     
     try {
       // Convert empty strings to 0 for numeric fields
-      const dataToSubmit = {
-        ...formData,
-        points: Number(formData.points) || 0,
-        rebounds: Number(formData.rebounds) || 0,
-        assists: Number(formData.assists) || 0,
-        steals: Number(formData.steals) || 0,
-        blocks: Number(formData.blocks) || 0,
-        turnovers: Number(formData.turnovers) || 0,
-        fieldGoalsMade: Number(formData.fieldGoalsMade) || 0,
-        fieldGoalsAttempted: Number(formData.fieldGoalsAttempted) || 0,
-        threePointersMade: Number(formData.threePointersMade) || 0,
-        threePointersAttempted: Number(formData.threePointersAttempted) || 0,
-        freeThrowsMade: Number(formData.freeThrowsMade) || 0,
-        freeThrowsAttempted: Number(formData.freeThrowsAttempted) || 0,
-        fouls: Number(formData.fouls) || 0,
-        minutesPlayed: Number(formData.minutesPlayed) || 0,
-      };
+      const numFields = [
+        'completions','passAttempts','passingYards','passingTDs','interceptions','passeFumbles','sacksTaken',
+        'rushAttempts','rushingYards','rushingTDs','rushFumbles',
+        'receptions','targets','receivingYards','receivingTDs','recFumbles',
+        'snaps','sacksAllowed',
+        'tackles','tacklesForLoss','defensiveSacks','hurries','safeties','defInterceptions',
+        'passBreakups','receptionsAllowed','targetsDefended','yardsAllowed','touchdownsAllowed',
+        'defensiveTDs','forcedFumbles','fumbleRecoveries',
+        'fieldGoalsMade','fieldGoalsAttempted','extraPointsMade','extraPointsAttempted',
+        'returns','returnYards','returnTDs','returnFumbles',
+      ];
+      const dataToSubmit: any = { ...formData };
+      numFields.forEach(f => { dataToSubmit[f] = Number((formData as any)[f]) || 0; });
       
       const method = editingStatId ? 'PUT' : 'POST';
       const body = editingStatId 
@@ -153,46 +152,45 @@ export default function GameStatsAdmin() {
       gameId: stat.gameId || '',
       date: stat.date,
       opponent: stat.opponent,
-      points: stat.points,
-      rebounds: stat.rebounds,
-      assists: stat.assists,
-      steals: stat.steals,
-      blocks: stat.blocks,
-      turnovers: stat.turnovers,
-      fieldGoalsMade: stat.fieldGoalsMade,
-      fieldGoalsAttempted: stat.fieldGoalsAttempted,
-      threePointersMade: stat.threePointersMade,
-      threePointersAttempted: stat.threePointersAttempted,
-      freeThrowsMade: stat.freeThrowsMade,
-      freeThrowsAttempted: stat.freeThrowsAttempted,
-      fouls: stat.fouls,
-      minutesPlayed: stat.minutesPlayed || '',
       result: stat.result,
+      completions: stat.completions ?? '', passAttempts: stat.passAttempts ?? '',
+      passingYards: stat.passingYards ?? '', passingTDs: stat.passingTDs ?? '',
+      interceptions: stat.interceptions ?? '', passeFumbles: stat.passeFumbles ?? '',
+      sacksTaken: stat.sacksTaken ?? '',
+      rushAttempts: stat.rushAttempts ?? '', rushingYards: stat.rushingYards ?? '',
+      rushingTDs: stat.rushingTDs ?? '', rushFumbles: stat.rushFumbles ?? '',
+      receptions: stat.receptions ?? '', targets: stat.targets ?? '',
+      receivingYards: stat.receivingYards ?? '', receivingTDs: stat.receivingTDs ?? '',
+      recFumbles: stat.recFumbles ?? '',
+      snaps: stat.snaps ?? '', sacksAllowed: stat.sacksAllowed ?? '',
+      tackles: stat.tackles ?? '', tacklesForLoss: stat.tacklesForLoss ?? '',
+      defensiveSacks: stat.defensiveSacks ?? '', hurries: stat.hurries ?? '',
+      safeties: stat.safeties ?? '', defInterceptions: stat.defInterceptions ?? '',
+      passBreakups: stat.passBreakups ?? '', receptionsAllowed: stat.receptionsAllowed ?? '',
+      targetsDefended: stat.targetsDefended ?? '', yardsAllowed: stat.yardsAllowed ?? '',
+      touchdownsAllowed: stat.touchdownsAllowed ?? '', defensiveTDs: stat.defensiveTDs ?? '',
+      forcedFumbles: stat.forcedFumbles ?? '', fumbleRecoveries: stat.fumbleRecoveries ?? '',
+      fieldGoalsMade: stat.fieldGoalsMade ?? '', fieldGoalsAttempted: stat.fieldGoalsAttempted ?? '',
+      extraPointsMade: stat.extraPointsMade ?? '', extraPointsAttempted: stat.extraPointsAttempted ?? '',
+      returns: stat.returns ?? '', returnYards: stat.returnYards ?? '',
+      returnTDs: stat.returnTDs ?? '', returnFumbles: stat.returnFumbles ?? '',
     });
     setShowForm(true);
   };
 
   const resetForm = () => {
     setFormData({
-      playerId: '',
-      gameId: '',
-      date: '',
-      opponent: '',
-      points: '',
-      rebounds: '',
-      assists: '',
-      steals: '',
-      blocks: '',
-      turnovers: '',
-      fieldGoalsMade: '',
-      fieldGoalsAttempted: '',
-      threePointersMade: '',
-      threePointersAttempted: '',
-      freeThrowsMade: '',
-      freeThrowsAttempted: '',
-      fouls: '',
-      minutesPlayed: '',
-      result: 'W',
+      playerId: '', gameId: '', date: '', opponent: '', result: 'W',
+      completions: '', passAttempts: '', passingYards: '', passingTDs: '',
+      interceptions: '', passeFumbles: '', sacksTaken: '',
+      rushAttempts: '', rushingYards: '', rushingTDs: '', rushFumbles: '',
+      receptions: '', targets: '', receivingYards: '', receivingTDs: '', recFumbles: '',
+      snaps: '', sacksAllowed: '',
+      tackles: '', tacklesForLoss: '', defensiveSacks: '', hurries: '', safeties: '',
+      defInterceptions: '', passBreakups: '', receptionsAllowed: '', targetsDefended: '',
+      yardsAllowed: '', touchdownsAllowed: '', defensiveTDs: '', forcedFumbles: '', fumbleRecoveries: '',
+      fieldGoalsMade: '', fieldGoalsAttempted: '', extraPointsMade: '', extraPointsAttempted: '',
+      returns: '', returnYards: '', returnTDs: '', returnFumbles: '',
     });
     setPlayerSearch('');
     setEditingStatId(null);
@@ -279,12 +277,12 @@ export default function GameStatsAdmin() {
     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold flex items-center text-gray-900 dark:text-white">
-          <TrendingUp className="w-6 h-6 mr-2 text-eba-blue" />
+          <TrendingUp className="w-6 h-6 mr-2 text-hsfl-blue" />
           Game Stats
         </h2>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
+          className="px-4 py-2 bg-hsfl-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center space-x-2"
         >
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           <span>{showForm ? 'Cancel' : 'Add Game Stats'}</span>
@@ -306,7 +304,7 @@ export default function GameStatsAdmin() {
                   placeholder="Search players by name or username..."
                   value={playerSearch}
                   onChange={(e) => setPlayerSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
                 />
               </div>
               <div className="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
@@ -322,7 +320,7 @@ export default function GameStatsAdmin() {
                       }}
                       className={`w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
                         formData.playerId === player.id
-                          ? 'bg-eba-blue text-white hover:bg-blue-600'
+                          ? 'bg-hsfl-blue text-white hover:bg-blue-600'
                           : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                       }`}
                     >
@@ -355,7 +353,7 @@ export default function GameStatsAdmin() {
                   placeholder="Search games by date, teams, or score..."
                   value={gameSearchInput}
                   onChange={(e) => setGameSearchInput(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
                 />
               </div>
               <div className="max-h-64 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-lg">
@@ -411,7 +409,7 @@ export default function GameStatsAdmin() {
                         }}
                         className={`w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
                           formData.gameId === game.id
-                            ? 'bg-eba-blue text-white hover:bg-blue-600'
+                            ? 'bg-hsfl-blue text-white hover:bg-blue-600'
                             : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
                         }`}
                       >
@@ -444,7 +442,7 @@ export default function GameStatsAdmin() {
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
               />
             </div>
 
@@ -460,7 +458,7 @@ export default function GameStatsAdmin() {
                 onChange={handleChange}
                 required
                 placeholder="Opponent team name"
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
               />
             </div>
 
@@ -474,7 +472,7 @@ export default function GameStatsAdmin() {
                 value={formData.result}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
               >
                 <option value="W">Win</option>
                 <option value="L">Loss</option>
@@ -482,211 +480,101 @@ export default function GameStatsAdmin() {
             </div>
           </div>
 
-          <div className="border-t border-gray-300 dark:border-gray-600 pt-6">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Statistics</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* Points */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Points
-                </label>
-                <input
-                  type="number"
-                  name="points"
-                  value={formData.points}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* FG Made */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  FG Made
-                </label>
-                <input
-                  type="number"
-                  name="fieldGoalsMade"
-                  value={formData.fieldGoalsMade}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* FG Attempted */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  FG Attempted
-                </label>
-                <input
-                  type="number"
-                  name="fieldGoalsAttempted"
-                  value={formData.fieldGoalsAttempted}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* 3PT Made */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  3PT Made
-                </label>
-                <input
-                  type="number"
-                  name="threePointersMade"
-                  value={formData.threePointersMade}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* 3PT Attempted */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  3PT Attempted
-                </label>
-                <input
-                  type="number"
-                  name="threePointersAttempted"
-                  value={formData.threePointersAttempted}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* FT Made */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  FT Made
-                </label>
-                <input
-                  type="number"
-                  name="freeThrowsMade"
-                  value={formData.freeThrowsMade}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* FT Attempted */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  FT Attempted
-                </label>
-                <input
-                  type="number"
-                  name="freeThrowsAttempted"
-                  value={formData.freeThrowsAttempted}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Assists */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Assists
-                </label>
-                <input
-                  type="number"
-                  name="assists"
-                  value={formData.assists}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Steals */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Steals
-                </label>
-                <input
-                  type="number"
-                  name="steals"
-                  value={formData.steals}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Blocks */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Blocks
-                </label>
-                <input
-                  type="number"
-                  name="blocks"
-                  value={formData.blocks}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Rebounds */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Rebounds
-                </label>
-                <input
-                  type="number"
-                  name="rebounds"
-                  value={formData.rebounds}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Turnovers */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Turnovers
-                </label>
-                <input
-                  type="number"
-                  name="turnovers"
-                  value={formData.turnovers}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Fouls */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Fouls
-                </label>
-                <input
-                  type="number"
-                  name="fouls"
-                  value={formData.fouls}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-              {/* Minutes Played */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Minutes Played
-                </label>
-                <input
-                  type="number"
-                  name="minutesPlayed"
-                  value={formData.minutesPlayed}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
+          <div className="border-t border-gray-300 dark:border-gray-600 pt-6 space-y-6">
+            {/* Helper for stat input */}
+            {(() => {
+              const N = ({ name, label }: { name: string; label: string }) => (
+                <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
+                  <input type="number" name={name} value={(formData as any)[name]} onChange={handleChange} min="0"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white" />
+                </div>
+              );
+              return (
+                <>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Passing</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="completions"  label="Completions" />
+                      <N name="passAttempts" label="Attempts" />
+                      <N name="passingYards" label="Passing Yards" />
+                      <N name="passingTDs"   label="Passing TDs" />
+                      <N name="interceptions" label="Interceptions" />
+                      <N name="passeFumbles"  label="Fumbles" />
+                      <N name="sacksTaken"    label="Times Sacked" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Rushing</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="rushAttempts" label="Attempts" />
+                      <N name="rushingYards" label="Rushing Yards" />
+                      <N name="rushingTDs"   label="Rushing TDs" />
+                      <N name="rushFumbles"  label="Fumbles" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Receiving</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="receptions"     label="Receptions" />
+                      <N name="targets"        label="Targets" />
+                      <N name="receivingYards" label="Rec. Yards" />
+                      <N name="receivingTDs"   label="Rec. TDs" />
+                      <N name="recFumbles"     label="Fumbles" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Blocking</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="snaps"        label="Snaps" />
+                      <N name="sacksAllowed" label="Sacks Allowed" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Defense</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="tackles"           label="Tackles" />
+                      <N name="tacklesForLoss"    label="TFL" />
+                      <N name="defensiveSacks"    label="Sacks" />
+                      <N name="hurries"           label="Hurries" />
+                      <N name="safeties"          label="Safeties" />
+                      <N name="defInterceptions"  label="INT" />
+                      <N name="passBreakups"      label="Pass Breakups" />
+                      <N name="receptionsAllowed" label="Rec. Allowed" />
+                      <N name="targetsDefended"   label="Targets Def." />
+                      <N name="yardsAllowed"      label="Yards Allowed" />
+                      <N name="touchdownsAllowed" label="TDs Allowed" />
+                      <N name="defensiveTDs"      label="Def. TDs" />
+                      <N name="forcedFumbles"     label="Forced Fumbles" />
+                      <N name="fumbleRecoveries"  label="Fumble Rec." />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Kicking</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="fieldGoalsMade"       label="FG Made" />
+                      <N name="fieldGoalsAttempted"  label="FG Attempted" />
+                      <N name="extraPointsMade"      label="XP Made" />
+                      <N name="extraPointsAttempted" label="XP Attempted" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-3">Returning</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N name="returns"       label="Returns" />
+                      <N name="returnYards"   label="Return Yards" />
+                      <N name="returnTDs"     label="Return TDs" />
+                      <N name="returnFumbles" label="Fumbles" />
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <button
             type="submit"
-            className="w-full px-6 py-3 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+            className="w-full px-6 py-3 bg-hsfl-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
           >
             {editingStatId ? 'Update Game Stats' : 'Add Game Stats'}
           </button>
@@ -709,7 +597,7 @@ export default function GameStatsAdmin() {
               placeholder="Search by team name or date..."
               value={gameSearch}
               onChange={(e) => setGameSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
             />
           </div>
         </div>

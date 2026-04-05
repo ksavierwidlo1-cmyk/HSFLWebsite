@@ -1,11 +1,8 @@
 'use client';
 
-import { Calendar, ChevronRight, Radio, ExternalLink, TrendingUp, User } from 'lucide-react';
+import { ChevronRight, Radio, ExternalLink, User, Trophy, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-// Note: Metadata export doesn't work in 'use client' components
-// The metadata is already set in layout.tsx which covers this page
 
 export default function Home() {
   const [articles, setArticles] = useState<any[]>([]);
@@ -13,10 +10,8 @@ export default function Home() {
   const [teams, setTeams] = useState<any[]>([]);
   const [players, setPlayers] = useState<any[]>([]);
   const [liveStream, setLiveStream] = useState<any>(null);
+  const [currentSeason, setCurrentSeason] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
-  // Configure your background video here - use a direct video file path
-  const backgroundVideoUrl = "/videos/hero-background.mp4";
 
   useEffect(() => {
     fetchData();
@@ -24,25 +19,29 @@ export default function Home() {
 
   const fetchData = async () => {
     try {
-      const [articlesRes, gamesRes, teamsRes, playersRes, streamRes] = await Promise.all([
+      const [articlesRes, gamesRes, teamsRes, playersRes, streamRes, seasonsRes] = await Promise.all([
         fetch('/api/articles'),
         fetch('/api/games'),
         fetch('/api/teams'),
         fetch('/api/players'),
-        fetch('/api/live-stream')
+        fetch('/api/live-stream'),
+        fetch('/api/seasons')
       ]);
-      const [articlesData, gamesData, teamsData, playersData, streamData] = await Promise.all([
+      const [articlesData, gamesData, teamsData, playersData, streamData, seasonsData] = await Promise.all([
         articlesRes.json(),
         gamesRes.json(),
         teamsRes.json(),
         playersRes.json(),
-        streamRes.json()
+        streamRes.json(),
+        seasonsRes.json()
       ]);
       setArticles(articlesData);
       setGames(gamesData);
       setTeams(teamsData);
       setPlayers(playersData);
       setLiveStream(streamData.stream);
+      const current = Array.isArray(seasonsData) ? seasonsData.find((s: any) => s.isCurrent) : null;
+      setCurrentSeason(current || null);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -50,19 +49,54 @@ export default function Home() {
     }
   };
 
-  const upcomingGames = games
-    .filter(g => g.status === 'scheduled')
-    .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime())
-    .slice(0, 5);
-
   const latestArticles = articles
     .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime())
     .slice(0, 3);
 
-  const topPlayers = players
-    .filter(p => p.stats && p.stats.gamesPlayed > 0)
-    .sort((a, b) => (b.stats?.points || 0) - (a.stats?.points || 0))
-    .slice(0, 5);
+  // Calculate team rankings using same logic as standings page
+  const teamRankings = teams
+    .map(team => {
+      const teamGames = games.filter(
+        g => (g.homeTeamId === team.id || g.awayTeamId === team.id) && g.status === 'completed'
+      );
+      let wins = 0;
+      let losses = 0;
+      let pointsFor = 0;
+      let pointsAgainst = 0;
+      teamGames.forEach(g => {
+        const isHome = g.homeTeamId === team.id;
+        const teamScore = isHome ? (g.homeScore || 0) : (g.awayScore || 0);
+        const oppScore = isHome ? (g.awayScore || 0) : (g.homeScore || 0);
+        pointsFor += teamScore;
+        pointsAgainst += oppScore;
+        let teamWon = false;
+        if (g.isForfeit && g.forfeitWinner) {
+          teamWon = (isHome && g.forfeitWinner === 'home') || (!isHome && g.forfeitWinner === 'away');
+        } else {
+          teamWon = teamScore > oppScore;
+        }
+        if (teamWon) wins++; else losses++;
+      });
+      const pointDifferential = pointsFor - pointsAgainst;
+      return { team, wins, losses, pointDifferential };
+    })
+    .sort((a, b) => {
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      if (a.losses !== b.losses) return a.losses - b.losses;
+      return b.pointDifferential - a.pointDifferential;
+    })
+    .slice(0, 10);
+
+  // Top Performers (football stats)
+  const topPasser = [...players].sort(
+    (a, b) => (b.stats?.passingYards || 0) - (a.stats?.passingYards || 0)
+  )[0];
+  const topRusher = [...players].sort(
+    (a, b) => (b.stats?.rushingYards || 0) - (a.stats?.rushingYards || 0)
+  )[0];
+  const topReceiver = [...players].sort(
+    (a, b) => (b.stats?.receivingYards || 0) - (a.stats?.receivingYards || 0)
+  )[0];
 
   if (loading) {
     return (
@@ -74,46 +108,40 @@ export default function Home() {
 
   return (
     <>
-      {/* Full-Screen Hero Video Background */}
-      <div className="relative min-h-[70vh] mb-8 overflow-hidden rounded-lg">
-        {/* Background Video */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="absolute top-0 left-0 w-full h-full object-cover"
-          style={{ pointerEvents: 'none' }}
-        >
-          <source src={backgroundVideoUrl} type="video/mp4" />
-          {/* Fallback for browsers that don't support video */}
-          Your browser does not support the video tag.
-        </video>
+      {/* Hero Image */}
+      <div className="relative min-h-[70vh] mb-8 overflow-hidden rounded-lg bg-gray-900">
+        {/* Custom hero background image — place your image at /public/hero-bg.jpg */}
+        <img
+          src="/hero-bg.jpg"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        />
 
         {/* Dark Overlay */}
-        <div className="absolute top-0 left-0 w-full h-full bg-black/60" />
+        <div className="absolute inset-0 bg-black/55" />
 
         {/* Hero Content */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full min-h-[70vh] px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
-            Elite Basketball Association
+            High School Football League
           </h1>
           <p className="text-xl sm:text-2xl text-gray-100 mb-8 max-w-3xl drop-shadow-lg">
-            Experience the most competitive Roblox basketball league. Watch highlights, follow your favorite teams, and witness elite competition.
+            Roblox's most realistic football league.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Link
               href="/games"
-              className="px-8 py-4 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-bold text-lg transition-colors shadow-xl"
+              className="px-8 py-4 bg-hsfl-blue hover:bg-hsfl-blue-dark text-white rounded-lg font-bold text-lg transition-colors shadow-xl"
             >
               View Schedule
             </Link>
             <Link
-              href="/branding"
+              href="/standings"
               className="px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border-2 border-white rounded-lg font-bold text-lg transition-colors shadow-xl"
             >
-              Explore Teams
+              View Standings
             </Link>
           </div>
         </div>
@@ -121,226 +149,304 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content - News and Articles */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Live Stream Section */}
-          {liveStream && (
-            <div className="bg-gradient-to-r from-red-500 to-purple-600 rounded-lg p-1 shadow-lg">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Radio className="w-6 h-6 text-red-600 animate-pulse" />
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Live Game - Tune In!
-                  </h2>
-                  <span className="ml-auto px-3 py-1 bg-red-600 text-white text-sm font-bold rounded-full animate-pulse">
-                    LIVE
-                  </span>
-                </div>
-                
-                <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                  {liveStream.title}
-                </h3>
-
-                {/* Twitch Embed */}
-                <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
-                  <iframe
-                    src={`https://player.twitch.tv/?channel=${liveStream.twitch_channel}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'ebassociation.com'}`}
-                    className="absolute top-0 left-0 w-full h-full rounded-lg"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between">
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
-                    Watching on Twitch: <span className="font-mono font-semibold">{liveStream.twitch_channel}</span>
-                  </p>
-                  <a
-                    href={`https://twitch.tv/${liveStream.twitch_channel}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    Watch on Twitch
-                  </a>
+          {/* Main Content - News */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Live Stream Section */}
+            {liveStream && (
+              <div className="bg-gradient-to-r from-red-500 to-purple-600 rounded-lg p-1 shadow-lg">
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Radio className="w-6 h-6 text-red-600 animate-pulse" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Live Game - Tune In!
+                    </h2>
+                    <span className="ml-auto px-3 py-1 bg-red-600 text-white text-sm font-bold rounded-full animate-pulse">
+                      LIVE
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                    {liveStream.title}
+                  </h3>
+                  <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+                    <iframe
+                      src={`https://player.twitch.tv/?channel=${liveStream.twitch_channel}&parent=${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}`}
+                      className="absolute top-0 left-0 w-full h-full rounded-lg"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                      Watching on Twitch:{' '}
+                      <span className="font-mono font-semibold">{liveStream.twitch_channel}</span>
+                    </p>
+                    <a
+                      href={`https://twitch.tv/${liveStream.twitch_channel}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Watch on Twitch
+                    </a>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Latest News */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Latest News</h2>
-              <Link href="/news" className="text-eba-blue hover:text-blue-600 flex items-center text-sm">
-                View All <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-            
-            <div className="space-y-4">
-              {latestArticles.map((article) => (
-                <article
-                  key={article.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-eba-blue dark:hover:border-eba-blue transition-colors shadow-sm"
-                >
-                  {article.image && (
-                    <div className="w-full h-48 relative">
-                      <img
-                        src={article.image}
-                        alt={article.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">{article.title}</h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
-                      {new Date(article.publishedDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })} • By {article.author}
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-300">{article.excerpt || article.content.slice(0, 150)}...</p>
-                    <Link
-                      href={`/news/${article.id}`}
-                      className="inline-block mt-4 text-eba-blue hover:text-blue-600 font-medium"
-                    >
-                      Read More →
-                    </Link>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar - Upcoming Games */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-4 space-y-6">
-            {/* Upcoming Games */}
+            {/* Latest News */}
             <div>
-              <h2 className="text-2xl font-bold mb-4 flex items-center text-gray-900 dark:text-white">
-                <Calendar className="w-6 h-6 mr-2 text-eba-blue" />
-                Upcoming Games
-              </h2>
-              
-              <div className="space-y-3">
-                {upcomingGames.length > 0 ? (
-                  upcomingGames.map((game) => {
-                    const homeTeam = teams.find(t => t.id === game.homeTeamId);
-                    const awayTeam = teams.find(t => t.id === game.awayTeamId);
-                    
-                    return (
-                      <Link
-                        key={game.id}
-                        href={`/games/${game.id}`}
-                        className="block bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-eba-blue dark:hover:border-eba-blue transition-colors shadow-sm"
-                      >
-                        <div className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-                          {new Date(game.scheduledDate).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900 dark:text-white">{awayTeam?.name || 'TBD'}</div>
-                            <div className="text-gray-600 dark:text-gray-400 text-sm">@ {homeTeam?.name || 'TBD'}</div>
-                          </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
-                        </div>
-                      </Link>
-                    );
-                  })
-                ) : (
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 shadow-sm">
-                    No upcoming games scheduled
-                  </div>
-                )}
-                
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Latest News</h2>
                 <Link
-                  href="/games"
-                  className="block text-center py-3 px-4 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors shadow-sm"
+                  href="/news"
+                  className="text-hsfl-blue hover:text-hsfl-blue-dark flex items-center text-sm"
                 >
-                  View Full Schedule
+                  View All <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-            </div>
-
-            {/* League Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
-                <div className="text-3xl font-bold text-eba-blue">{teams.length}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Teams</div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
-                <div className="text-3xl font-bold text-eba-blue">{players.length}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Players</div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
-                <div className="text-3xl font-bold text-eba-blue">{games.length}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Games</div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 text-center shadow-sm">
-                <div className="text-3xl font-bold text-eba-blue">
-                  {games.filter(g => g.status === 'scheduled').length}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Upcoming Games</div>
-              </div>
-            </div>
-
-            {/* Top Scorers */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
-                <TrendingUp className="w-5 h-5 text-eba-blue" />
-                Top Scorers
-              </h2>
-              {topPlayers.length > 0 ? (
-                <div className="space-y-3">
-                  {topPlayers.map((player, index) => (
-                    <Link
-                      key={player.id}
-                      href={`/players/${player.id}`}
-                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              <div className="space-y-4">
+                {latestArticles.length > 0 ? (
+                  latestArticles.map(article => (
+                    <article
+                      key={article.id}
+                      className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-hsfl-blue dark:hover:border-hsfl-blue transition-colors shadow-sm"
                     >
-                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {player.profilePicture ? (
+                      {article.image && (
+                        <div className="w-full h-48">
                           <img
-                            src={player.profilePicture}
-                            alt={player.displayName}
+                            src={article.image}
+                            alt={article.title}
                             className="w-full h-full object-cover"
                           />
-                        ) : (
-                          <User className="w-5 h-5 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                          {player.displayName}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {teams.find(t => t.id === player.teamId)?.abbreviation || 'FA'}
-                        </div>
+                      )}
+                      <div className="p-6">
+                        <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                          {article.title}
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">
+                          {new Date(article.publishedDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}{' '}
+                          • By {article.author}
+                        </p>
+                        <p className="text-gray-700 dark:text-gray-300">
+                          {article.excerpt || article.content?.slice(0, 150)}...
+                        </p>
+                        <Link
+                          href={`/news/${article.id}`}
+                          className="inline-block mt-4 text-hsfl-blue hover:text-hsfl-blue-dark font-medium"
+                        >
+                          Read More →
+                        </Link>
                       </div>
-                      <div className="text-lg font-bold text-eba-blue">
-                        {player.stats?.points?.toFixed(1) || '0.0'}
-                      </div>
-                    </Link>
-                  ))}
+                    </article>
+                  ))
+                ) : (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 shadow-sm">
+                    No news articles yet
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 space-y-6">
+
+              {/* High School Football Rankings */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div className="bg-hsfl-blue px-4 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                      <Trophy className="w-5 h-5" />
+                      High Football Rankings
+                    </h2>
+                    {currentSeason && (
+                      <span className="text-xs font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full whitespace-nowrap">
+                        {currentSeason.name}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 text-sm text-center py-4">
-                  No player data yet
-                </p>
-              )}
+
+                <div className="px-2 pt-2">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-gray-500 dark:text-gray-400 text-xs border-b border-gray-200 dark:border-gray-700">
+                        <th className="text-center px-2 py-2 w-8">#</th>
+                        <th className="text-left px-2 py-2">Team</th>
+                        <th className="text-right px-2 py-2 pr-3">Record</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teamRankings.length > 0 ? (
+                        teamRankings.map((entry, index) => (
+                          <tr
+                            key={entry.team.id}
+                            className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                          >
+                            <td className="px-2 py-2 font-bold text-gray-500 dark:text-gray-400 text-center text-xs">
+                              {index + 1}
+                            </td>
+                            <td className="px-2 py-2">
+                              <div className="flex items-center gap-2">
+                                {entry.team.logo ? (
+                                  <img
+                                    src={entry.team.logo}
+                                    alt={entry.team.name}
+                                    className="w-6 h-6 object-contain flex-shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-6 h-6 rounded-full bg-hsfl-blue flex-shrink-0" />
+                                )}
+                                <span className="font-medium text-gray-900 dark:text-white truncate text-sm">
+                                  {entry.team.name}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-2 py-2 pr-3 text-right">
+                              <span className="font-bold text-gray-900 dark:text-white">
+                                {entry.wins > 0 || entry.losses > 0 ? `${entry.wins}-${entry.losses}` : '—'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <tr
+                            key={i}
+                            className="border-b border-gray-100 dark:border-gray-700 last:border-0"
+                          >
+                            <td className="px-2 py-2 text-center text-gray-400 text-xs">{i + 1}</td>
+                            <td className="px-2 py-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex-shrink-0" />
+                                <span className="text-gray-400 dark:text-gray-500 text-sm">TBD</span>
+                              </div>
+                            </td>
+                            <td className="px-2 py-2 pr-3 text-right text-gray-400">—</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="p-3">
+                  <Link
+                    href="/standings"
+                    className="block text-center py-2 px-4 bg-hsfl-blue hover:bg-hsfl-blue-dark text-white rounded-lg font-medium transition-colors text-sm"
+                  >
+                    Full Standings
+                  </Link>
+                </div>
+              </div>
+
+              {/* Top Performers */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+                    <Zap className="w-5 h-5 text-yellow-500" />
+                    Top Performers
+                  </h2>
+                  {currentSeason && (
+                    <span className="text-xs font-semibold bg-hsfl-blue text-white px-2 py-0.5 rounded-full whitespace-nowrap">
+                      {currentSeason.name}
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <PerformerRow
+                    label="Passing Yards"
+                    player={topPasser}
+                    statValue={topPasser?.stats?.passingYards}
+                    teamAbbr={teams.find(t => t.id === topPasser?.teamId)?.abbreviation}
+                  />
+                  <div className="border-t border-gray-100 dark:border-gray-700" />
+                  <PerformerRow
+                    label="Rushing Yards"
+                    player={topRusher}
+                    statValue={topRusher?.stats?.rushingYards}
+                    teamAbbr={teams.find(t => t.id === topRusher?.teamId)?.abbreviation}
+                  />
+                  <div className="border-t border-gray-100 dark:border-gray-700" />
+                  <PerformerRow
+                    label="Receiving Yards"
+                    player={topReceiver}
+                    statValue={topReceiver?.stats?.receivingYards}
+                    teamAbbr={teams.find(t => t.id === topReceiver?.teamId)?.abbreviation}
+                  />
+                </div>
+
+                <Link
+                  href="/stats"
+                  className="block text-center mt-4 py-2 px-4 bg-hsfl-blue hover:bg-hsfl-blue-dark text-white rounded-lg font-medium transition-colors text-sm"
+                >
+                  View All Stats
+                </Link>
+              </div>
+
             </div>
           </div>
         </div>
       </div>
-      </div>
     </>
+  );
+}
+
+function PerformerRow({
+  label,
+  player,
+  statValue,
+  teamAbbr,
+}: {
+  label: string;
+  player: any;
+  statValue: number | undefined;
+  teamAbbr: string | undefined;
+}) {
+  return (
+    <div>
+      <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+        {label}
+      </div>
+      {player ? (
+        <Link
+          href={`/players/${player.id}`}
+          className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+        >
+          <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+            {player.profilePicture ? (
+              <img
+                src={player.profilePicture}
+                alt={player.displayName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="w-4 h-4 text-gray-400" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-sm text-gray-900 dark:text-white truncate">
+              {player.displayName}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">{teamAbbr || 'EA'}</div>
+          </div>
+          <div className="text-right">
+            <div className="text-base font-bold text-hsfl-blue">
+              {(statValue || 0).toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-400">YDS</div>
+          </div>
+        </Link>
+      ) : (
+        <p className="text-gray-400 dark:text-gray-500 text-sm py-1 px-2">No data yet</p>
+      )}
+    </div>
   );
 }

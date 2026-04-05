@@ -22,16 +22,9 @@ export default function PlayersAdmin() {
   const [discordUsername, setDiscordUsername] = useState('');
   const [teamId, setTeamId] = useState('');
   const [roles, setRoles] = useState<string[]>(['Player']);
-  const [showStats, setShowStats] = useState(false);
-  
-  // Stats state
-  const [gamesPlayed, setGamesPlayed] = useState('0');
-  const [points, setPoints] = useState('0');
-  const [rebounds, setRebounds] = useState('0');
-  const [assists, setAssists] = useState('0');
-  const [steals, setSteals] = useState('0');
-  const [blocks, setBlocks] = useState('0');
-  const [turnovers, setTurnovers] = useState('0');
+  const [jerseyNumber, setJerseyNumber] = useState('');
+  const [positions, setPositions] = useState<string[]>([]);
+  const [starRating, setStarRating] = useState(0);
   
   // Search state
   const [teamSearch, setTeamSearch] = useState('');
@@ -94,15 +87,9 @@ export default function PlayersAdmin() {
           discordUsername,
           teamId,
           roles,
-          stats: {
-            gamesPlayed: parseInt(gamesPlayed) || 0,
-            points: parseFloat(points) || 0,
-            rebounds: parseFloat(rebounds) || 0,
-            assists: parseFloat(assists) || 0,
-            steals: parseFloat(steals) || 0,
-            blocks: parseFloat(blocks) || 0,
-            turnovers: parseFloat(turnovers) || 0,
-          },
+          jerseyNumber: jerseyNumber !== '' ? parseInt(jerseyNumber) : null,
+          positions,
+          starRating,
         }),
       });
 
@@ -138,15 +125,9 @@ export default function PlayersAdmin() {
           discordUsername,
           teamId,
           roles,
-          stats: {
-            gamesPlayed: parseInt(gamesPlayed) || 0,
-            points: parseFloat(points) || 0,
-            rebounds: parseFloat(rebounds) || 0,
-            assists: parseFloat(assists) || 0,
-            steals: parseFloat(steals) || 0,
-            blocks: parseFloat(blocks) || 0,
-            turnovers: parseFloat(turnovers) || 0,
-          },
+          jerseyNumber: jerseyNumber !== '' ? parseInt(jerseyNumber) : null,
+          positions,
+          starRating,
         }),
       });
 
@@ -198,15 +179,10 @@ export default function PlayersAdmin() {
     setDiscordUsername('');
     setTeamId('');
     setRoles(['Player']);
-    setGamesPlayed('0');
-    setPoints('0');
-    setRebounds('0');
-    setAssists('0');
-    setSteals('0');
-    setBlocks('0');
-    setTurnovers('0');
+    setJerseyNumber('');
+    setPositions([]);
+    setStarRating(0);
     setTeamSearch('');
-    setShowStats(false);
     setShowImportForm(false);
     setShowEditForm(false);
     setSelectedPlayer(null);
@@ -219,13 +195,9 @@ export default function PlayersAdmin() {
     setDiscordUsername(player.discordUsername || '');
     setTeamId(player.teamId || '');
     setRoles(player.roles || ['Player']);
-    setGamesPlayed(player.stats?.gamesPlayed?.toString() || '0');
-    setPoints(player.stats?.points?.toString() || '0');
-    setRebounds(player.stats?.rebounds?.toString() || '0');
-    setAssists(player.stats?.assists?.toString() || '0');
-    setSteals(player.stats?.steals?.toString() || '0');
-    setBlocks(player.stats?.blocks?.toString() || '0');
-    setTurnovers(player.stats?.turnovers?.toString() || '0');
+    setJerseyNumber(player.jerseyNumber != null ? String(player.jerseyNumber) : '');
+    setPositions(player.positions || []);
+    setStarRating(player.starRating ?? 0);
     setShowEditForm(true);
     setShowImportForm(false);
   };
@@ -249,7 +221,7 @@ export default function PlayersAdmin() {
               setShowEditForm(false);
             }
           }}
-          className="flex items-center space-x-2 px-4 py-2 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 bg-hsfl-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
         >
           <UserPlus className="w-5 h-5" />
           <span>Import Player</span>
@@ -274,7 +246,7 @@ export default function PlayersAdmin() {
                 onChange={(e) => setRobloxUsername(e.target.value)}
                 placeholder="Enter Roblox username"
                 disabled={showEditForm}
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white disabled:opacity-50"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white disabled:opacity-50"
               />
               {!showEditForm && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -292,7 +264,7 @@ export default function PlayersAdmin() {
                 value={discordUsername}
                 onChange={(e) => setDiscordUsername(e.target.value)}
                 placeholder="username#1234"
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
               />
             </div>
 
@@ -305,14 +277,14 @@ export default function PlayersAdmin() {
                 value={teamSearch}
                 onChange={(e) => setTeamSearch(e.target.value)}
                 placeholder="Search teams..."
-                className="w-full px-4 py-2 mb-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 mb-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
               />
               <select
                 value={teamId}
                 onChange={(e) => setTeamId(e.target.value)}
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
               >
-                <option value="">Free Agent</option>
+                <option value="">Eligible Athlete</option>
                 {filteredTeams.map((team) => (
                   <option key={team.id} value={team.id}>{team.name}</option>
                 ))}
@@ -333,7 +305,7 @@ export default function PlayersAdmin() {
                     setRoles(roles.filter(r => r !== 'Staff'));
                   }
                 }}
-                className="w-5 h-5 text-eba-blue bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-eba-blue focus:ring-2"
+                className="w-5 h-5 text-hsfl-blue bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-hsfl-blue focus:ring-2"
               />
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Assign Staff Role (displays hammer icon on comments and posts)
@@ -341,116 +313,73 @@ export default function PlayersAdmin() {
             </label>
           </div>
 
-          {/* Stats Section */}
+          {/* Star Rating */}
           <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => setShowStats(!showStats)}
-              className="flex items-center space-x-2 text-gray-700 dark:text-gray-300 hover:text-eba-blue dark:hover:text-eba-blue font-medium"
-            >
-              <span>{showStats ? '▼' : '▶'}</span>
-              <span>Player Statistics (Optional)</span>
-            </button>
-            
-            {showStats && (
-              <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Games Played
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Star Rating — {starRating === 0 ? 'Unrated' : `${starRating} Star${starRating > 1 ? 's' : ''}`}
+            </label>
+            <div className="flex items-center gap-1">
+              {[0, 1, 2, 3, 4, 5].map(n => n === 0 ? (
+                <button key={0} onClick={() => setStarRating(0)}
+                  className={`px-2 py-1 text-xs rounded border transition-colors ${
+                    starRating === 0
+                      ? 'bg-gray-200 dark:bg-gray-600 border-gray-400 text-gray-700 dark:text-gray-200'
+                      : 'border-gray-300 dark:border-gray-600 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}>
+                  None
+                </button>
+              ) : (
+                <button key={n} onClick={() => setStarRating(n)} type="button"
+                  className="text-2xl leading-none transition-transform hover:scale-110 focus:outline-none"
+                  title={`${n} star${n > 1 ? 's' : ''}`}>
+                  <span className={n <= starRating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}>★</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Positions */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Position(s) — {positions.length > 0 ? positions.join('/') : 'none selected'}
+            </label>
+              <div className="grid grid-cols-3 gap-2 p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg max-h-44 overflow-y-auto">
+                {[
+                  { abbr: 'C',  name: 'Center' },
+                  { abbr: 'OG', name: 'Off. Guard' },
+                  { abbr: 'OT', name: 'Off. Tackle' },
+                  { abbr: 'QB', name: 'Quarterback' },
+                  { abbr: 'RB', name: 'Running Back' },
+                  { abbr: 'WR', name: 'Wide Receiver' },
+                  { abbr: 'TE', name: 'Tight End' },
+                  { abbr: 'K',  name: 'Kicker' },
+                  { abbr: 'CB', name: 'Cornerback' },
+                  { abbr: 'LB', name: 'Linebacker' },
+                  { abbr: 'DT', name: 'Def. Tackle' },
+                  { abbr: 'DE', name: 'Def. End' },
+                  { abbr: 'S',  name: 'Safety' },
+                ].map(pos => (
+                  <label key={pos.abbr} className="flex items-center space-x-1 cursor-pointer text-sm text-gray-700 dark:text-gray-300 hover:text-hsfl-blue">
+                    <input
+                      type="checkbox"
+                      checked={positions.includes(pos.abbr)}
+                      onChange={(e) => {
+                        if (e.target.checked) setPositions([...positions, pos.abbr]);
+                        else setPositions(positions.filter(p => p !== pos.abbr));
+                      }}
+                      className="rounded"
+                    />
+                    <span className="font-semibold">{pos.abbr}</span>
+                    <span className="text-xs text-gray-500">{pos.name}</span>
                   </label>
-                  <input
-                    type="number"
-                    value={gamesPlayed}
-                    onChange={(e) => setGamesPlayed(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Points (PPG)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={points}
-                    onChange={(e) => setPoints(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Rebounds (RPG)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={rebounds}
-                    onChange={(e) => setRebounds(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Assists (APG)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={assists}
-                    onChange={(e) => setAssists(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Steals (SPG)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={steals}
-                    onChange={(e) => setSteals(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Blocks (BPG)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={blocks}
-                    onChange={(e) => setBlocks(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">
-                    Turnovers (TPG)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={turnovers}
-                    onChange={(e) => setTurnovers(e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-                  />
-                </div>
+                ))}
               </div>
-            )}
           </div>
 
           <div className="flex space-x-3 mt-6">\n            <button
               onClick={showEditForm ? handleUpdatePlayer : handleImportPlayer}
               disabled={loading}
-              className="px-6 py-2 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-hsfl-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Saving...' : (showEditForm ? 'Update Player' : 'Import Player')}
             </button>
@@ -473,17 +402,17 @@ export default function PlayersAdmin() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search players by Roblox or Discord username..."
-            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
           />
         </div>
         <div className="sm:w-64">
           <select
             value={teamFilter}
             onChange={(e) => setTeamFilter(e.target.value)}
-            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
+            className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
           >
             <option value="">All Teams</option>
-            <option value="FREE_AGENT">Free Agents</option>
+            <option value="FREE_AGENT">Eligible Athletes</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>{team.name}</option>
             ))}
@@ -501,7 +430,7 @@ export default function PlayersAdmin() {
           filteredPlayers.map((player) => (
             <div
               key={player.id}
-              className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-eba-blue dark:hover:border-eba-blue transition-colors"
+              className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-hsfl-blue dark:hover:border-hsfl-blue transition-colors"
             >
               <div className="flex-1">
                 <div className="flex items-center space-x-4">
@@ -541,7 +470,7 @@ export default function PlayersAdmin() {
                 </button>
                 <button
                   onClick={() => openEditForm(player)}
-                  className="p-2 text-eba-blue hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 text-hsfl-blue hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   title="Edit player"
                 >
                   <Edit2 className="w-5 h-5" />
@@ -563,6 +492,7 @@ export default function PlayersAdmin() {
       {showGameStatsModal && gameStatsPlayer && (
         <AddGameStatsModal
           playerId={gameStatsPlayer.id}
+          playerTeamId={gameStatsPlayer.teamId || ''}
           playerName={gameStatsPlayer.displayName || gameStatsPlayer.robloxUsername}
           onClose={() => {
             setShowGameStatsModal(false);

@@ -5,35 +5,38 @@ import { X } from 'lucide-react';
 
 interface AddGameStatsModalProps {
   playerId: string;
+  playerTeamId: string;
   playerName: string;
   onClose: () => void;
   onSave: (gameStats: any) => void;
 }
 
-export default function AddGameStatsModal({ playerId, playerName, onClose, onSave }: AddGameStatsModalProps) {
+export default function AddGameStatsModal({ playerId, playerTeamId, playerName, onClose, onSave }: AddGameStatsModalProps) {
   const [games, setGames] = useState<any[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
   const [selectedGameId, setSelectedGameId] = useState('');
   const [opponent, setOpponent] = useState('');
   const [result, setResult] = useState<'W' | 'L'>('W');
   const [date, setDate] = useState('');
   
   // Stats
-  const [points, setPoints] = useState('0');
-  const [rebounds, setRebounds] = useState('0');
-  const [assists, setAssists] = useState('0');
-  const [steals, setSteals] = useState('0');
-  const [blocks, setBlocks] = useState('0');
-  const [turnovers, setTurnovers] = useState('0');
-  const [fgm, setFgm] = useState('0');
-  const [fga, setFga] = useState('0');
-  const [tpm, setTpm] = useState('0');
-  const [tpa, setTpa] = useState('0');
-  const [ftm, setFtm] = useState('0');
-  const [fta, setFta] = useState('0');
-  const [fouls, setFouls] = useState('0');
+  const [stats, setStats] = useState({
+    completions: '0', passAttempts: '0', passingYards: '0', passingTDs: '0',
+    interceptions: '0', passeFumbles: '0', sacksTaken: '0',
+    rushAttempts: '0', rushingYards: '0', rushingTDs: '0', rushFumbles: '0',
+    receptions: '0', targets: '0', receivingYards: '0', receivingTDs: '0', recFumbles: '0',
+    snaps: '0', sacksAllowed: '0',
+    tackles: '0', tacklesForLoss: '0', defensiveSacks: '0', hurries: '0', safeties: '0',
+    defInterceptions: '0', passBreakups: '0', receptionsAllowed: '0', targetsDefended: '0',
+    yardsAllowed: '0', touchdownsAllowed: '0', defensiveTDs: '0', forcedFumbles: '0', fumbleRecoveries: '0',
+    fieldGoalsMade: '0', fieldGoalsAttempted: '0', extraPointsMade: '0', extraPointsAttempted: '0',
+    returns: '0', returnYards: '0', returnTDs: '0', returnFumbles: '0',
+  });
+  const setStat = (k: string, v: string) => setStats(prev => ({ ...prev, [k]: v }));
 
   useEffect(() => {
     fetchGames();
+    fetchTeams();
   }, []);
 
   const fetchGames = async () => {
@@ -46,7 +49,46 @@ export default function AddGameStatsModal({ playerId, playerName, onClose, onSav
     }
   };
 
+  const fetchTeams = async () => {
+    try {
+      const response = await fetch('/api/teams');
+      const data = await response.json();
+      setTeams(data);
+    } catch (error) {
+      console.error('Failed to fetch teams:', error);
+    }
+  };
+
+  // Games involving the player's team, sorted newest first
+  const playerGames = playerTeamId
+    ? games.filter(g => g.homeTeamId === playerTeamId || g.awayTeamId === playerTeamId)
+    : games;
+
+  const handleGameSelect = (gameId: string) => {
+    setSelectedGameId(gameId);
+    if (!gameId) return;
+    const game = games.find(g => g.id === gameId);
+    if (!game) return;
+
+    // Auto-fill date
+    setDate(game.scheduledDate.split('T')[0]);
+
+    // Auto-fill opponent name
+    const opponentTeamId = game.homeTeamId === playerTeamId ? game.awayTeamId : game.homeTeamId;
+    const opponentTeam = teams.find(t => t.id === opponentTeamId);
+    setOpponent(opponentTeam?.name || '');
+
+    // Auto-fill result from score if game is completed
+    if (game.status === 'completed' && game.homeScore != null && game.awayScore != null) {
+      const isHome = game.homeTeamId === playerTeamId;
+      const myScore = isHome ? game.homeScore : game.awayScore;
+      const theirScore = isHome ? game.awayScore : game.homeScore;
+      setResult(myScore >= theirScore ? 'W' : 'L');
+    }
+  };
+
   const handleSave = () => {
+    const n = (k: string) => Number(stats[k as keyof typeof stats]) || 0;
     const gameStats = {
       id: Date.now().toString(),
       playerId,
@@ -54,19 +96,24 @@ export default function AddGameStatsModal({ playerId, playerName, onClose, onSav
       date: date || new Date().toISOString(),
       opponent,
       result,
-      points: parseFloat(points) || 0,
-      rebounds: parseFloat(rebounds) || 0,
-      assists: parseFloat(assists) || 0,
-      steals: parseFloat(steals) || 0,
-      blocks: parseFloat(blocks) || 0,
-      turnovers: parseFloat(turnovers) || 0,
-      fieldGoalsMade: parseInt(fgm) || 0,
-      fieldGoalsAttempted: parseInt(fga) || 0,
-      threePointersMade: parseInt(tpm) || 0,
-      threePointersAttempted: parseInt(tpa) || 0,
-      freeThrowsMade: parseInt(ftm) || 0,
-      freeThrowsAttempted: parseInt(fta) || 0,
-      fouls: parseInt(fouls) || 0,
+      completions: n('completions'), passAttempts: n('passAttempts'), passingYards: n('passingYards'),
+      passingTDs: n('passingTDs'), interceptions: n('interceptions'), passeFumbles: n('passeFumbles'),
+      sacksTaken: n('sacksTaken'),
+      rushAttempts: n('rushAttempts'), rushingYards: n('rushingYards'), rushingTDs: n('rushingTDs'),
+      rushFumbles: n('rushFumbles'),
+      receptions: n('receptions'), targets: n('targets'), receivingYards: n('receivingYards'),
+      receivingTDs: n('receivingTDs'), recFumbles: n('recFumbles'),
+      snaps: n('snaps'), sacksAllowed: n('sacksAllowed'),
+      tackles: n('tackles'), tacklesForLoss: n('tacklesForLoss'), defensiveSacks: n('defensiveSacks'),
+      hurries: n('hurries'), safeties: n('safeties'), defInterceptions: n('defInterceptions'),
+      passBreakups: n('passBreakups'), receptionsAllowed: n('receptionsAllowed'),
+      targetsDefended: n('targetsDefended'), yardsAllowed: n('yardsAllowed'),
+      touchdownsAllowed: n('touchdownsAllowed'), defensiveTDs: n('defensiveTDs'),
+      forcedFumbles: n('forcedFumbles'), fumbleRecoveries: n('fumbleRecoveries'),
+      fieldGoalsMade: n('fieldGoalsMade'), fieldGoalsAttempted: n('fieldGoalsAttempted'),
+      extraPointsMade: n('extraPointsMade'), extraPointsAttempted: n('extraPointsAttempted'),
+      returns: n('returns'), returnYards: n('returnYards'), returnTDs: n('returnTDs'),
+      returnFumbles: n('returnFumbles'),
     };
 
     onSave(gameStats);
@@ -89,191 +136,130 @@ export default function AddGameStatsModal({ playerId, playerName, onClose, onSav
 
         <div className="p-6">
           {/* Game Selection */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Select Game (Optional)
-              </label>
-              <select
-                value={selectedGameId}
-                onChange={(e) => {
-                  setSelectedGameId(e.target.value);
-                  const game = games.find(g => g.id === e.target.value);
-                  if (game) {
-                    setDate(game.scheduledDate.split('T')[0]);
-                  }
-                }}
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-              >
-                <option value="">Manual Entry</option>
-                {games.map(game => (
-                  <option key={game.id} value={game.id}>
-                    {new Date(game.scheduledDate).toLocaleDateString()} - {game.status}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Opponent
-              </label>
-              <input
-                type="text"
-                value={opponent}
-                onChange={(e) => setOpponent(e.target.value)}
-                placeholder="Team name"
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Result
-              </label>
-              <select
-                value={result}
-                onChange={(e) => setResult(e.target.value as 'W' | 'L')}
-                className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-eba-blue text-gray-900 dark:text-white"
-              >
-                <option value="W">Win</option>
-                <option value="L">Loss</option>
-              </select>
-            </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Select Game
+            </label>
+            <select
+              value={selectedGameId}
+              onChange={(e) => handleGameSelect(e.target.value)}
+              className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
+            >
+              <option value="">— Manual Entry —</option>
+              {playerGames.map(game => {
+                const opponentTeamId = game.homeTeamId === playerTeamId ? game.awayTeamId : game.homeTeamId;
+                const opponentTeam = teams.find(t => t.id === opponentTeamId);
+                const label = `${new Date(game.scheduledDate).toLocaleDateString()} vs ${opponentTeam?.name || 'Unknown'} (${game.status})`;
+                return <option key={game.id} value={game.id}>{label}</option>;
+              })}
+            </select>
+            {selectedGameId && (
+              <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                ✓ Date, opponent, and result auto-filled from game
+              </p>
+            )}
           </div>
 
+          {/* Date / Opponent / Result — shown only for manual entry */}
+          {!selectedGameId && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Date *</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Opponent *</label>
+                <input
+                  type="text"
+                  value={opponent}
+                  onChange={(e) => setOpponent(e.target.value)}
+                  placeholder="Opponent team name"
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Result *</label>
+                <select
+                  value={result}
+                  onChange={(e) => setResult(e.target.value as 'W' | 'L')}
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:border-hsfl-blue text-gray-900 dark:text-white"
+                >
+                  <option value="W">Win</option>
+                  <option value="L">Loss</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           {/* Stats Grid */}
-          <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Game Statistics</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Points</label>
-              <input
-                type="number"
-                value={points}
-                onChange={(e) => setPoints(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Rebounds</label>
-              <input
-                type="number"
-                value={rebounds}
-                onChange={(e) => setRebounds(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Assists</label>
-              <input
-                type="number"
-                value={assists}
-                onChange={(e) => setAssists(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Steals</label>
-              <input
-                type="number"
-                value={steals}
-                onChange={(e) => setSteals(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Blocks</label>
-              <input
-                type="number"
-                value={blocks}
-                onChange={(e) => setBlocks(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Turnovers</label>
-              <input
-                type="number"
-                value={turnovers}
-                onChange={(e) => setTurnovers(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">FGM</label>
-              <input
-                type="number"
-                value={fgm}
-                onChange={(e) => setFgm(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">FGA</label>
-              <input
-                type="number"
-                value={fga}
-                onChange={(e) => setFga(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">3PM</label>
-              <input
-                type="number"
-                value={tpm}
-                onChange={(e) => setTpm(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">3PA</label>
-              <input
-                type="number"
-                value={tpa}
-                onChange={(e) => setTpa(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">FTM</label>
-              <input
-                type="number"
-                value={ftm}
-                onChange={(e) => setFtm(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">FTA</label>
-              <input
-                type="number"
-                value={fta}
-                onChange={(e) => setFta(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Fouls</label>
-              <input
-                type="number"
-                value={fouls}
-                onChange={(e) => setFouls(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
+          <div className="space-y-5 mb-6">
+            {(() => {
+              const N = ({ k, label }: { k: string; label: string }) => (
+                <div>
+                  <label className="block text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">{label}</label>
+                  <input type="number" value={stats[k as keyof typeof stats]} onChange={e => setStat(k, e.target.value)} min="0"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white" />
+                </div>
+              );
+              return (
+                <>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Passing</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="completions" label="Completions" /><N k="passAttempts" label="Attempts" />
+                      <N k="passingYards" label="Passing Yards" /><N k="passingTDs" label="Passing TDs" />
+                      <N k="interceptions" label="Interceptions" /><N k="passeFumbles" label="Fumbles" />
+                      <N k="sacksTaken" label="Times Sacked" />
+                    </div>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Rushing</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="rushAttempts" label="Attempts" /><N k="rushingYards" label="Rushing Yards" />
+                      <N k="rushingTDs" label="Rushing TDs" /><N k="rushFumbles" label="Fumbles" />
+                    </div>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Receiving</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="receptions" label="Receptions" /><N k="targets" label="Targets" />
+                      <N k="receivingYards" label="Rec. Yards" /><N k="receivingTDs" label="Rec. TDs" />
+                      <N k="recFumbles" label="Fumbles" />
+                    </div>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Blocking</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="snaps" label="Snaps" /><N k="sacksAllowed" label="Sacks Allowed" />
+                    </div>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Defense</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="tackles" label="Tackles" /><N k="tacklesForLoss" label="TFL" />
+                      <N k="defensiveSacks" label="Sacks" /><N k="hurries" label="Hurries" />
+                      <N k="safeties" label="Safeties" /><N k="defInterceptions" label="INT" />
+                      <N k="passBreakups" label="Pass Breakups" /><N k="receptionsAllowed" label="Rec. Allowed" />
+                      <N k="targetsDefended" label="Targets Def." /><N k="yardsAllowed" label="Yards Allowed" />
+                      <N k="touchdownsAllowed" label="TDs Allowed" /><N k="defensiveTDs" label="Def. TDs" />
+                      <N k="forcedFumbles" label="Forced Fumbles" /><N k="fumbleRecoveries" label="Fumble Rec." />
+                    </div>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Kicking</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="fieldGoalsMade" label="FG Made" /><N k="fieldGoalsAttempted" label="FG Attempted" />
+                      <N k="extraPointsMade" label="XP Made" /><N k="extraPointsAttempted" label="XP Attempted" />
+                    </div>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase mb-2">Returning</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <N k="returns" label="Returns" /><N k="returnYards" label="Return Yards" />
+                      <N k="returnTDs" label="Return TDs" /><N k="returnFumbles" label="Fumbles" />
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {/* Action Buttons */}
@@ -286,7 +272,7 @@ export default function AddGameStatsModal({ playerId, playerName, onClose, onSav
             </button>
             <button
               onClick={handleSave}
-              className="px-6 py-2 bg-eba-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+              className="px-6 py-2 bg-hsfl-blue hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
             >
               Add Game Stats
             </button>
