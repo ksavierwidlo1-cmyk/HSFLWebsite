@@ -113,7 +113,7 @@ export interface Team {
   generalManager?: string;
   headCoach?: string;
   assistantCoaches: string[];
-  conference: '7A' | '6A' | '5A';
+  conference: 'Eastern' | 'Western';
   colors: {
     primary: string;
     secondary: string;
