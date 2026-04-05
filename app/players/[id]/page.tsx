@@ -187,6 +187,7 @@ export default function PlayerProfilePage({ params }: { params: { id: string } }
       gp, wins, losses,
       passingYards: gp > 0 ? passingYards / gp : 0, passingTDs: gp > 0 ? passingTDs / gp : 0,
       completionPct: passAttempts > 0 ? (completions / passAttempts) * 100 : 0, passerRating,
+      passAttempts,
       rushingYards: gp > 0 ? rushingYards / gp : 0, rushingTDs: gp > 0 ? rushingTDs / gp : 0,
       rushAttempts: gp > 0 ? rushAttempts / gp : 0,
       receptions: gp > 0 ? receptions / gp : 0, receivingYards: gp > 0 ? receivingYards / gp : 0,
